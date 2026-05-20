@@ -71,10 +71,13 @@ test('mobile-width flow persists and settles', async ({ page }, testInfo) => {
   const mobile = page.locator('[data-layout="mobile"]');
   await expect(mobile.getByText('Travel Split')).toBeVisible();
 
-  await mobile.getByRole('tab', { name: 'People' }).click();
+  await mobile.getByRole('button', { name: 'New trip ready. Add people to get started.' }).click();
+  await expect(mobile.getByRole('tab', { name: 'People' })).toHaveAttribute('aria-selected', 'true');
+  await expect(mobile.getByLabel('Add someone')).toBeFocused();
   await mobile.getByLabel('Add someone').fill('Alex');
   await mobile.getByRole('button', { name: 'Add to trip' }).click();
   await expect(mobile.getByText('Alex')).toBeVisible();
+  await expect(mobile.getByLabel('Add someone')).toBeFocused();
   await mobile.getByLabel('Add someone').fill('Mina');
   await mobile.getByRole('button', { name: 'Add to trip' }).click();
   await expect(mobile.getByText('Mina')).toBeVisible();
@@ -186,11 +189,12 @@ test('desktop-width workspace flow shows all panels at once', async ({ page }, t
   await expect(desktop.getByRole('heading', { name: 'Trip group' })).toBeVisible();
   await expect(desktop.getByRole('heading', { name: 'Activities & costs' })).toBeVisible();
   await expect(desktop.getByRole('heading', { name: 'Who pays whom' })).toBeVisible();
-  await expect(desktop.getByRole('button', { name: /Go to People|Add people|Record an expense/ })).toHaveCount(0);
+  await expect(desktop.locator('.empty-state-action')).toHaveCount(0);
 
   await desktop.getByLabel('Add someone').fill('Alex');
   await desktop.getByRole('button', { name: 'Add to trip' }).click();
   await expect(desktop.getByText('Alex').first()).toBeVisible();
+  await expect(desktop.getByLabel('Add someone')).toBeFocused();
   await desktop.getByLabel('Add someone').fill('Mina');
   await desktop.getByRole('button', { name: 'Add to trip' }).click();
   await expect(desktop.getByText('Mina').first()).toBeVisible();

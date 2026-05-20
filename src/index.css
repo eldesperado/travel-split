@@ -258,6 +258,27 @@
     flex-shrink: 0;
   }
 
+  .trip-banner-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  .trip-banner-action:focus-visible {
+    outline: 2px solid #3f6f56;
+    outline-offset: 3px;
+  }
+
   .trip-banner-msg {
     flex: 1;
   }

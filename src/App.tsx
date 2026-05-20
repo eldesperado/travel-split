@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { NavBar } from './components/NavBar';
 import { TabBar, type TabId } from './components/TabBar';
 import { TripDataProvider, useTripData } from './data/TripDataProvider';
+import { WARNING_MESSAGES } from './domain/errors';
 import { ExpensesScreen } from './screens/ExpensesScreen';
 import { PeopleScreen } from './screens/PeopleScreen';
 import { SettleScreen } from './screens/SettleScreen';
-import { NavigationProvider } from './ui/NavigationContext';
+import { NavigationProvider, useNavigation } from './ui/NavigationContext';
 import { useResponsiveLayout } from './ui/usePlatformLayout';
 
 export default function App() {
@@ -25,7 +26,7 @@ function TravelSplitShell() {
     return (
       <NavigationProvider layout={layout} onMobileTabChange={setActiveTab}>
         <div className="app-shell mobile-app-shell" data-layout="mobile">
-          <NavBar showCopy={activeTab === 'settle'} />
+          <NavBar />
           <TripBanner />
 
           {status === 'loading' ? (
@@ -65,14 +66,27 @@ function TravelSplitShell() {
 
 function TripBanner() {
   const { warning, clearMessage } = useTripData();
+  const { goTo } = useNavigation();
   if (!warning) return null;
-  return (
-    <div className="trip-banner" role="status" aria-live="polite">
+
+  const isPeoplePrompt = warning === WARNING_MESSAGES['trip.started'];
+  const content = (
+    <>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.75" />
         <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
       </svg>
       <span className="trip-banner-msg">{warning}</span>
+    </>
+  );
+
+  return (
+    <div className="trip-banner" role="status" aria-live="polite">
+      {isPeoplePrompt ? (
+        <button type="button" className="trip-banner-action" onClick={() => goTo('people')}>
+          {content}
+        </button>
+      ) : content}
       <button className="trip-banner-dismiss" onClick={clearMessage} aria-label="Dismiss notification">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

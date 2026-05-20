@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useState } from 'react';
+import React, { useCallback, useId, useRef, useState } from 'react';
 import { ErrorCallout } from '../components/ErrorCallout';
 import { useScopedError, useTripData } from '../data/TripDataProvider';
 import type { Person } from '../domain/types';
@@ -7,6 +7,7 @@ import { useNavigation } from '../ui/NavigationContext';
 
 export function PeopleScreen() {
   const inputId = useId();
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [nameInput, setNameInput] = useState('');
   const { trip, selectors, addPerson, removePerson, clearMessage } = useTripData();
   const { registerInput } = useNavigation();
@@ -19,7 +20,15 @@ export function PeopleScreen() {
 
   async function submitPerson() {
     const added = await addPerson(nameInput);
-    if (added) setNameInput('');
+    if (!added) return;
+
+    setNameInput('');
+    nameInputRef.current?.focus({ preventScroll: true });
+  }
+
+  function registerNameInput(element: HTMLInputElement | null) {
+    nameInputRef.current = element;
+    registerInput('peopleName', element);
   }
 
   return (
@@ -40,7 +49,7 @@ export function PeopleScreen() {
             <label className="field-label" htmlFor={inputId}>Add someone</label>
             <input
               id={inputId}
-              ref={(element) => registerInput('peopleName', element)}
+              ref={registerNameInput}
               className="field-input"
               type="text"
               placeholder="Name"
