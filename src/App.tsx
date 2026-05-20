@@ -29,7 +29,7 @@ function TravelSplitShell() {
         {status === 'loading' ? (
           <div className="screen-body flex items-center justify-center text-sm text-ink-subtle">Loading your trip…</div>
         ) : (
-          <div key={activeTab} className="flex-1 min-h-0 overflow-hidden screen-enter">
+          <div key={activeTab} className="flex-1 min-h-0 overflow-hidden screen-enter flex flex-col">
             {activeTab === 'people' && <PeopleScreen />}
             {activeTab === 'expenses' && <ExpensesScreen />}
             {activeTab === 'settle' && <SettleScreen />}

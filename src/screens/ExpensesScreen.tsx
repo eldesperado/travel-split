@@ -17,11 +17,13 @@ export function ExpensesScreen() {
   const amountInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
   const [included, setIncluded] = useState<Record<string, boolean>>({});
   const [weights, setWeights] = useState<Record<string, string>>({});
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
   const animatedExpenses = useAnimatedCollection(
     trip.expenses,
     useCallback((expense: Expense) => expense.id, []),
@@ -54,11 +56,12 @@ export function ExpensesScreen() {
     const titleInvalidBeforeSave = !title.trim();
     const amountInvalidBeforeSave = !parseAmountToCents(amount).ok;
     const invalidWeightBeforeSave = invalidWeightPersonId != null;
-    const saved = await upsertExpense({ title, amount, payerId: paidBy, participants: selectedParticipants });
+    const saved = await upsertExpense({ id: editingId ?? undefined, title, amount, payerId: paidBy, participants: selectedParticipants });
     if (saved) {
       setTitle('');
       setAmount('');
       setCustomizeOpen(false);
+      setEditingId(null);
       return;
     }
 
@@ -76,6 +79,39 @@ export function ExpensesScreen() {
       focusInput(weightInputRefs.current[invalidWeightPersonId]);
     }
   }
+
+  function startEdit(expense: Expense) {
+    setEditingId(expense.id);
+    setTitle(expense.title);
+    setAmount((expense.amountCents / 100).toFixed(2));
+    setPaidBy(expense.payerId);
+    const weighted = expense.participants.some((p) => p.weight !== 1);
+    setCustomizeOpen(weighted);
+    const participantMap = new Map(expense.participants.map((p) => [p.personId, p.weight]));
+    setIncluded(Object.fromEntries(trip.people.map((p) => [p.id, participantMap.has(p.id)])));
+    setWeights(Object.fromEntries(trip.people.map((p) => [p.id, String(participantMap.get(p.id) ?? 1)])));
+    clearMessage();
+    requestAnimationFrame(() => {
+      titleInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      titleInputRef.current?.focus({ preventScroll: true });
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setTitle('');
+    setAmount('');
+    setCustomizeOpen(false);
+    clearMessage();
+  }
+
+  useEffect(() => {
+    if (!customizeOpen) return;
+    const id = window.setTimeout(() => {
+      saveButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 320);
+    return () => window.clearTimeout(id);
+  }, [customizeOpen]);
 
   const amountHasError = isAmountErrorMessage(error);
   const selectedWeightTotal = selectedParticipants.reduce((sum, participant) => {
@@ -96,10 +132,14 @@ export function ExpensesScreen() {
         <div className="panel-inner">
           <div className="panel-head">
             <div>
-              <p className="section-eyebrow">Expenses</p>
-              <h2 className="panel-title">Activities &amp; costs</h2>
+              <p className="section-eyebrow">{editingId ? 'Editing expense' : 'Expenses'}</p>
+              <h2 className="panel-title">{editingId ? 'Update details' : 'Activities & costs'}</h2>
             </div>
-            <span className="count-badge">{trip.expenses.length}</span>
+            {editingId ? (
+              <button type="button" className="btn-secondary h-9 text-[12px] px-3" onClick={cancelEdit}>Cancel</button>
+            ) : (
+              <span className="count-badge">{trip.expenses.length}</span>
+            )}
           </div>
 
           <ErrorCallout message={error} onDismiss={clearMessage} />
@@ -186,11 +226,11 @@ export function ExpensesScreen() {
                 </div>
               </div>
 
-              <button className="btn-primary" type="button" onClick={saveExpense}>
+              <button ref={saveButtonRef} className="btn-primary" type="button" onClick={saveExpense}>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Save expense
+                {editingId ? 'Update expense' : 'Save expense'}
               </button>
             </>
           )}
@@ -212,6 +252,12 @@ export function ExpensesScreen() {
                       <p className="text-xs text-ink-subtle mt-0.5">Paid by {payer?.name ?? 'Unknown'} · {expense.participants.length} people{weighted && ' · weighted'}</p>
                     </div>
                     <span className="font-mono text-[14px] font-medium text-ink-primary whitespace-nowrap">{formatCentsAbs(expense.amountCents)}</span>
+                    <button className="btn-icon w-[30px] h-[30px] text-ink-muted" aria-label={`Edit ${expense.title}`} onClick={() => startEdit(expense)}>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                     <button className="btn-icon w-[30px] h-[30px] text-negative/80" aria-label={`Delete ${expense.title}`} onClick={() => void deleteExpense(expense.id)}>
                       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                         <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
