@@ -32,6 +32,14 @@ test('shell selection follows viewport width', async ({ page }) => {
     const shellBox = await mobileShell.boundingBox();
     expect(shellBox).not.toBeNull();
     expect(shellBox!.width).toBeLessThanOrEqual(720);
+
+    const tabBarBox = await page.getByRole('tablist', { name: 'App sections' }).boundingBox();
+    const activeSurfaceBox = await page.locator('[data-active-surface="true"]').boundingBox();
+    expect(tabBarBox).not.toBeNull();
+    expect(activeSurfaceBox).not.toBeNull();
+    expect(tabBarBox!.x).toBeGreaterThanOrEqual(shellBox!.x - 1);
+    expect(tabBarBox!.x + tabBarBox!.width).toBeLessThanOrEqual(shellBox!.x + shellBox!.width + 1);
+    expect(activeSurfaceBox!.width).toBeLessThanOrEqual(64);
   } else {
     await expect(page.locator('[data-layout="desktop"]')).toBeVisible();
     await expect(page.locator('[data-layout="mobile"]')).toHaveCount(0);
