@@ -1,26 +1,26 @@
 import type { DomainError } from './types';
 
 export const ERROR_MESSAGES = {
-  'amount.empty': 'Enter an amount.',
-  'amount.invalid': 'Use dollars and cents, like 40 or 40.50.',
-  'amount.too_large': 'Amount is too large.',
-  'amount.positive': 'Amount must be greater than zero.',
-  'person.name.empty': 'Enter a name to add someone.',
-  'person.remove.referenced': 'Remove that person from expenses before deleting them.',
-  'expense.title.empty': 'Enter an expense title.',
-  'expense.amount.invalid': 'Enter an amount greater than zero.',
-  'expense.payer.invalid': 'Choose who paid.',
-  'expense.participants.empty': 'Choose at least one person to split this expense with.',
-  'expense.participant.invalid': 'Split includes someone who is not on this trip.',
-  'expense.participant.duplicate': 'Split includes the same person twice.',
-  'expense.weight.invalid': 'Enter a weight greater than zero for each selected person.',
-  'expense.invalid': 'Expense has an invalid payer or split.',
-  'storage.save.failed': 'Could not save this change locally. Try again.',
+  'amount.empty': 'Add an amount.',
+  'amount.invalid': 'Use a number like 40 or 40.50.',
+  'amount.too_large': 'That amount is too large to track.',
+  'amount.positive': 'Amount must be more than zero.',
+  'person.name.empty': 'Type a name to add someone.',
+  'person.remove.referenced': 'Remove this person from their expenses first.',
+  'expense.title.empty': 'Give this expense a name.',
+  'expense.amount.invalid': 'Amount must be more than zero.',
+  'expense.payer.invalid': 'Pick who paid.',
+  'expense.participants.empty': 'Pick someone to split this with.',
+  'expense.participant.invalid': 'One person in the split is no longer on this trip.',
+  'expense.participant.duplicate': 'Each person can only be in the split once.',
+  'expense.weight.invalid': 'Each share weight must be more than zero.',
+  'expense.invalid': "Something doesn't add up — check the payer and split.",
+  'storage.save.failed': "Couldn't save that change. Try again.",
 } as const;
 
 export const WARNING_MESSAGES = {
-  'trip.started': 'Started a new local trip.',
-  'storage.load.failed': 'Local database was unavailable, so an empty trip was opened.',
+  'trip.started': 'New trip ready. Add people to get started.',
+  'storage.load.failed': "Couldn't open your saved trip — starting fresh.",
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;
@@ -45,6 +45,6 @@ export function isAmountErrorMessage(message?: string): boolean {
 }
 
 export function invalidExpensesWarning(count: number): string {
-  const label = count === 1 ? 'expense' : 'expenses';
-  return `${count} invalid ${label} ignored in settlement math.`;
+  if (count === 1) return "1 expense couldn't be split — check its payer and shares.";
+  return `${count} expenses couldn't be split — check their payer and shares.`;
 }

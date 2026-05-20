@@ -123,6 +123,8 @@ sequenceDiagram
 - **Persistence seam:** `TripRepository` hides IndexedDB so a future SQLite store can be added without rewriting UI logic.
 - **Deterministic money math:** amounts are stored as integer cents and allocated with stable rounding behavior.
 - **Responsive shell:** viewport width selects mobile tabs or desktop workspace; both shells share the same domain and data provider.
+- **Scoped error surface:** validation errors carry a source (`people`, `expenses`, `global`) so each panel renders only its own; storage failures fall through as global. Source mapping lives in `src/domain/errors.ts`.
+- **Plain-English micro-copy:** user-facing messages live in `ERROR_MESSAGES` / `WARNING_MESSAGES`. The voice is action-led ("Add an amount.", "Pick who paid."), no jargon, and every error names the next step.
 
 ## Tech stack
 

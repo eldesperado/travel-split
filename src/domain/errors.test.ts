@@ -5,7 +5,7 @@ describe('errors', () => {
   it('creates domain errors from centralized messages', () => {
     expect(domainError('expense.weight.invalid')).toEqual({
       code: 'expense.weight.invalid',
-      message: 'Enter a weight greater than zero for each selected person.',
+      message: 'Each share weight must be more than zero.',
     });
   });
 
@@ -16,8 +16,8 @@ describe('errors', () => {
   });
 
   it('formats invalid expense warnings with singular and plural labels', () => {
-    expect(invalidExpensesWarning(1)).toBe('1 invalid expense ignored in settlement math.');
-    expect(invalidExpensesWarning(2)).toBe('2 invalid expenses ignored in settlement math.');
+    expect(invalidExpensesWarning(1)).toBe("1 expense couldn't be split — check its payer and shares.");
+    expect(invalidExpensesWarning(2)).toBe("2 expenses couldn't be split — check their payer and shares.");
   });
 });
 

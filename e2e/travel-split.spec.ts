@@ -119,14 +119,14 @@ test('custom weighted split points missing amount back to amount field and then 
   await mobile.getByRole('button', { name: 'Save expense' }).click();
 
   const amountInput = mobile.getByLabel('Amount');
-  await expect(mobile.getByText('Enter an amount.')).toBeVisible();
+  await expect(mobile.getByText('Add an amount.')).toBeVisible();
   await expect(amountInput).toBeFocused();
 
   await amountInput.fill('300');
   const johnWeightInput = mobile.locator('input[type="number"]').nth(1);
   await johnWeightInput.fill('0');
   await mobile.getByRole('button', { name: 'Save expense' }).click();
-  await expect(mobile.getByText('Enter a weight greater than zero for each selected person.')).toBeVisible();
+  await expect(mobile.getByText('Each share weight must be more than zero.')).toBeVisible();
   await expect(johnWeightInput).toBeFocused();
 
   await johnWeightInput.fill('0.5');
