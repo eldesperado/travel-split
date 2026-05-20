@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="agent-skill" content="visual-explainer">
+  <meta name="agent-topic" content="travel split user journeys">
+  <title>Travel Split — Interactive User Journey Walkthrough</title>
+  <style>
+    :root {
+      --font-serif: Charter, Georgia, Palatino, "Times New Roman", serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, Monaco, monospace;
+      --parchment: #f5f4ed;
+      --ivory: #faf9f5;
+      --warm-sand: #e8e6dc;
+      --brand: #1B365D;
+      --brand-light: #2D5A8A;
+      --brand-tint: #EEF2F7;
+      --brand-tint-strong: #E4ECF5;
+      --near-black: #141413;
+      --dark-warm: #3d3d3a;
+      --olive: #504e49;
+      --stone: #6b6a64;
+      --border: #e8e6dc;
+      --border-soft: #e5e3d8;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--parchment); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--parchment);
+      color: var(--near-black);
+      font-family: var(--font-serif);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: clamp(24px, 4vw, 56px);
+    }
+    .page { width: min(1120px, 100%); margin: 0 auto; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brand);
+    }
+    h1, h2, h3 { font-weight: 500; color: var(--near-black); text-wrap: balance; }
+    h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.06; margin: 12px 0; }
+    h2 { font-size: clamp(26px, 4vw, 42px); line-height: 1.14; margin: 0 0 16px; }
+    h3 { font-size: clamp(19px, 2.5vw, 26px); line-height: 1.22; margin: 0 0 8px; }
+    .lede { font-size: clamp(18px, 2vw, 22px); line-height: 1.5; color: var(--dark-warm); max-width: 850px; }
+    .muted { color: var(--olive); }
+    .meta { font-family: var(--font-mono); font-size: 12px; color: var(--stone); }
+    .section { margin-top: clamp(16px, 3vw, 36px); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .ve-card {
+      min-width: 0;
+      background: var(--ivory);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: clamp(16px, 2.4vw, 28px);
+    }
+    .ve-card--focal { background: var(--brand-tint); border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+    .ve-card--quiet { background: transparent; border-color: var(--border-soft); }
+    .ve-card__label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 10px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--brand-tint);
+      color: var(--brand);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .badge--neutral { background: var(--warm-sand); color: var(--olive); }
+    button, select {
+      font: inherit;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: var(--ivory);
+      color: var(--near-black);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--brand); }
+    button[aria-pressed="true"], .primary {
+      background: var(--brand);
+      color: var(--ivory);
+      border-color: var(--brand);
+    }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .walkthrough {
+      display: grid;
+      grid-template-columns: minmax(210px, 0.75fr) minmax(0, 1.4fr) minmax(260px, 0.85fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .journey-list { display: grid; gap: 8px; }
+    .journey-button { text-align: left; width: 100%; }
+    .journey-title { display: block; font-weight: 500; }
+    .journey-meta { display: block; margin-top: 2px; font-family: var(--font-mono); font-size: 11px; color: var(--stone); }
+    button[aria-pressed="true"] .journey-meta { color: var(--brand-tint-strong); }
+    .stepper { display: grid; gap: 14px; }
+    .progress-track {
+      height: 10px;
+      background: var(--warm-sand);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-fill { height: 100%; width: 0%; background: var(--brand); transition: width .25s ease; }
+    .step-card { min-height: 230px; }
+    .step-num { font-family: var(--font-mono); color: var(--brand); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+    .mock-app { display: grid; gap: 10px; }
+    .mock-panel { border: 1px solid var(--border-soft); border-radius: 8px; padding: 12px; background: color-mix(in srgb, var(--ivory) 70%, var(--parchment) 30%); }
+    .mock-panel strong { font-weight: 500; }
+    .mock-row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--border-soft); }
+    .mock-row:first-child { border-top: 0; }
+    .mock-focal { background: var(--brand-tint); border-color: var(--brand); }
+    .mini-input { border: 1px solid var(--border); border-radius: 6px; padding: 8px; background: var(--ivory); color: var(--stone); }
+    .diagram {
+      margin: 0;
+      padding: clamp(16px, 2vw, 24px);
+      background: var(--ivory);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    figcaption { margin-top: 10px; color: var(--olive); font-size: 14px; line-height: 1.4; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; background: var(--ivory); }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border-soft); text-align: left; vertical-align: top; }
+    th {
+      color: var(--dark-warm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--warm-sand);
+    }
+    tr:last-child td { border-bottom: 0; }
+    details { background: var(--ivory); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    summary { cursor: pointer; color: var(--brand); font-weight: 500; }
+    details[open] summary { margin-bottom: 12px; }
+    .clean-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .clean-list li { position: relative; padding-left: 22px; color: var(--dark-warm); }
+    .clean-list li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 8px; height: 1px; background: var(--brand); }
+    .copy-area {
+      width: 100%; min-height: 120px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--ivory); padding: 12px; color: var(--dark-warm); font-family: var(--font-mono); font-size: 13px;
+    }
+    .toast { min-height: 20px; color: var(--brand); font-family: var(--font-mono); font-size: 12px; }
+    :is(.ve-card, .section, .grid > *, .grid-2 > *, td, th) { min-width: 0; overflow-wrap: break-word; }
+    @media (max-width: 920px) { .walkthrough { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { body { padding: 20px; } .grid-2 { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="eyebrow">Travel Split · interactive walkthrough</div>
+      <h1>What users are trying to do, and how the app should guide them.</h1>
+      <p class="lede">The app is not a banking system or a collaboration network. It is a local travel notebook: add the group, record shared costs, and leave with a clear answer to “who pays whom?”</p>
+    </header>
+
+    <main>
+      <section class="grid section" aria-label="Core mental model">
+        <article class="ve-card ve-card--focal">
+          <div class="ve-card__label">One sentence</div>
+          <h3>Use case means the job.</h3>
+          <p>A use case is the situation the app must support: start a trip, add an expense, correct a mistake, settle up, or come back later.</p>
+        </article>
+        <article class="ve-card">
+          <div class="ve-card__label">One sentence</div>
+          <h3>User journey means the path.</h3>
+          <p>A journey is the sequence of screens, taps, checks, and outcomes someone goes through to finish that use case.</p>
+        </article>
+        <article class="ve-card">
+          <div class="ve-card__label">Phase 1 boundary</div>
+          <h3>Everything happens on one device.</h3>
+          <p>No accounts, backend, live invite links, or payment processing. Sharing is only copying a summary out to another app.</p>
+        </article>
+      </section>
+
+      <section class="section">
+        <figure class="diagram">
+          <svg viewBox="0 0 960 270" role="img" aria-labelledby="journey-map-title journey-map-desc">
+            <title id="journey-map-title">High-level Travel Split journey map</title>
+            <desc id="journey-map-desc">A five-step path from empty trip setup through expense recording, correction, settlement, and returning later.</desc>
+            <defs>
+              <style>
+                .node { fill:#faf9f5; stroke:#504e49; stroke-width:1.3; }
+                .node-focus { fill:#EEF2F7; stroke:#1B365D; stroke-width:2; }
+                .label { font-family: Georgia, serif; font-size: 18px; fill:#141413; }
+                .small { font-family: Georgia, serif; font-size: 13px; fill:#504e49; }
+                .arrow { fill:none; stroke:#1B365D; stroke-width:1.5; }
+              </style>
+            </defs>
+            <rect x="36" y="82" width="152" height="96" rx="8" class="node-focus"/>
+            <text x="112" y="122" text-anchor="middle" class="label">1. Set up</text>
+            <text x="112" y="148" text-anchor="middle" class="small">add people</text>
+            <path d="M188 130 H248" class="arrow"/><path d="M240 124 L250 130 L240 136" class="arrow"/>
+            <rect x="252" y="82" width="152" height="96" rx="8" class="node-focus"/>
+            <text x="328" y="122" text-anchor="middle" class="label">2. Record</text>
+            <text x="328" y="148" text-anchor="middle" class="small">add expenses</text>
+            <path d="M404 130 H464" class="arrow"/><path d="M456 124 L466 130 L456 136" class="arrow"/>
+            <rect x="468" y="82" width="152" height="96" rx="8" class="node"/>
+            <text x="544" y="122" text-anchor="middle" class="label">3. Correct</text>
+            <text x="544" y="148" text-anchor="middle" class="small">edit/delete</text>
+            <path d="M620 130 H680" class="arrow"/><path d="M672 124 L682 130 L672 136" class="arrow"/>
+            <rect x="684" y="82" width="152" height="96" rx="8" class="node-focus"/>
+            <text x="760" y="122" text-anchor="middle" class="label">4. Settle</text>
+            <text x="760" y="148" text-anchor="middle" class="small">who pays whom</text>
+            <path d="M760 178 V218 H112 V182" class="arrow"/><path d="M106 190 L112 180 L118 190" class="arrow"/>
+            <text x="436" y="236" text-anchor="middle" class="small">5. Return later: localStorage restores the same trip on this browser</text>
+          </svg>
+          <figcaption>The main flow is deliberately simple: setup and recording are primary; correction, settlement, and persistence protect trust.</figcaption>
+        </figure>
+      </section>
+
+      <section class="section walkthrough" aria-labelledby="walkthrough-title">
+        <aside class="ve-card">
+          <div class="ve-card__label">Choose a use case</div>
+          <h2 id="walkthrough-title">Walk through each job</h2>
+          <div class="journey-list" id="journeyButtons"></div>
+        </aside>
+
+        <article class="ve-card stepper">
+          <div>
+            <span class="badge" id="actorBadge">Organizer</span>
+            <span class="badge badge--neutral" id="priorityBadge">Main flow</span>
+          </div>
+          <h2 id="journeyName">Start a new trip</h2>
+          <p class="muted" id="journeyGoal">Add people so expenses can be recorded.</p>
+          <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="ve-card ve-card--quiet step-card" id="stepCard">
+            <div class="step-num" id="stepNum">Step 1 of 4</div>
+            <h3 id="stepTitle">Open workspace</h3>
+            <p id="stepBody">The app opens directly to the trip workspace.</p>
+            <p class="meta" id="stepWhy">Why: no setup wizard means fewer taps.</p>
+          </div>
+          <div class="button-row">
+            <button type="button" id="prevStep">Previous step</button>
+            <button type="button" id="nextStep" class="primary">Next step</button>
+          </div>
+        </article>
+
+        <aside class="ve-card">
+          <div class="ve-card__label">What changes on screen</div>
+          <div class="mock-app" id="mockApp" aria-live="polite"></div>
+        </aside>
+      </section>
+
+      <section class="section grid-2" aria-label="Organizer and member journeys">
+        <article class="ve-card">
+          <div class="ve-card__label">Organizer journey</div>
+          <h2>Creates the trip shape.</h2>
+          <ul class="clean-list">
+            <li>Adds the roster quickly as chips.</li>
+            <li>Optionally sets “recording as” for convenience.</li>
+            <li>Records the first expense using equal split defaults.</li>
+            <li>Controls roster cleanup: used people cannot be deleted.</li>
+            <li>Can copy a settlement summary to send elsewhere.</li>
+          </ul>
+        </article>
+        <article class="ve-card">
+          <div class="ve-card__label">Trip member journey</div>
+          <h2>Records or reads the trip state.</h2>
+          <ul class="clean-list">
+            <li>Uses the same local workspace when holding the device.</li>
+            <li>Can add expenses by choosing who paid.</li>
+            <li>Reviews activity and settlement suggestions.</li>
+            <li>Receives copied summary outside the app if the organizer shares it.</li>
+            <li>Does not join through an account or live link in Phase 1.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section" aria-labelledby="priority-title">
+        <h2 id="priority-title">Which use cases are primary?</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Use case</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Reason</th>
+                <th scope="col">Design implication</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Start trip and add people</td><td>Main</td><td>Nothing else works without a roster.</td><td>Fast chips, one input, no wizard.</td></tr>
+              <tr><td>Record equal expense</td><td>Main</td><td>Most common in-the-moment action.</td><td>Title, amount, payer, save. Equal split by default.</td></tr>
+              <tr><td>Review settlement</td><td>Main</td><td>The app’s promise is a trusted answer.</td><td>Receipt card explains each payment.</td></tr>
+              <tr><td>Weighted split</td><td>Sub-flow</td><td>Important but less frequent.</td><td>Advanced disclosure, not always visible.</td></tr>
+              <tr><td>Edit/delete expense</td><td>Sub-flow</td><td>Protects accuracy when mistakes happen.</td><td>Accessible row actions with immediate recalculation.</td></tr>
+              <tr><td>Remove person</td><td>Sub-flow</td><td>Only safe before expenses reference them.</td><td>Block deletion and explain why.</td></tr>
+              <tr><td>Return later</td><td>Trust flow</td><td>Prevents re-entry after reload.</td><td>Validated localStorage snapshot.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section grid-2" aria-label="Try the split mental model">
+        <article class="ve-card ve-card--focal">
+          <div class="ve-card__label">Tiny simulation</div>
+          <h2 id="simTitle">Why settlement says “Mina pays Alex.”</h2>
+          <p class="muted" id="simLede">In this example, Alex paid $60 for dinner split equally among Alex, Mina, and Sam.</p>
+          <div class="mock-app" id="simOutput" aria-live="polite"></div>
+          <div class="button-row" style="margin-top:14px">
+            <button type="button" data-sim="equal" aria-pressed="true">Equal dinner</button>
+            <button type="button" data-sim="weighted" aria-pressed="false">Weighted boat</button>
+          </div>
+        </article>
+        <article class="ve-card">
+          <div class="ve-card__label">Copy for handoff</div>
+          <h2 id="summaryHeading">Journey summary</h2>
+          <textarea class="copy-area" id="summaryText" aria-labelledby="summaryHeading" readonly></textarea>
+          <div class="button-row" style="margin-top:12px">
+            <button type="button" class="primary" id="copySummary">Copy summary</button>
+            <button type="button" id="resetWalkthrough">Reset walkthrough</button>
+          </div>
+          <p class="toast" id="copyToast" role="status" aria-live="polite"></p>
+        </article>
+      </section>
+
+      <section class="section">
+        <details>
+          <summary>Plain-language glossary</summary>
+          <div class="grid" style="margin-top:14px">
+            <div><strong>Actor</strong><p class="muted">The person doing the job: organizer, recorder, or member.</p></div>
+            <div><strong>Precondition</strong><p class="muted">What must already be true before the job can start.</p></div>
+            <div><strong>Journey</strong><p class="muted">The exact path through the app.</p></div>
+            <div><strong>Outcome</strong><p class="muted">The result the user expects when done.</p></div>
+          </div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const journeys = [
+      {
+        id: 'setup', label: 'Start trip', actor: 'Organizer', priority: 'Main flow',
+        goal: 'Create the roster so expenses can be recorded.',
+        steps: [
+          ['Open workspace', 'The app opens directly to People, Expenses, and Settlement. No setup wizard appears.', 'Why: setup speed matters more than onboarding ceremony.'],
+          ['Add names as chips', 'Organizer types Alex, Mina, and Sam. Each name appears immediately in the People area.', 'Why: roster entry should feel like making a quick travel note.'],
+          ['Choose recorder if helpful', 'The app may show “Recording as Alex” as a local convenience note.', 'Why: this is not an account; it just helps the person holding the device.'],
+          ['Ready for first expense', 'The Expenses area now has payer options and can default participants to everyone.', 'Outcome: the group is ready to record costs.']
+        ]
+      },
+      {
+        id: 'equal', label: 'Equal expense', actor: 'Any recorder', priority: 'Main flow',
+        goal: 'Record the common case in a few taps.',
+        steps: [
+          ['Enter title', 'Recorder types “Dinner.”', 'Why: a human-readable title makes the expense easy to correct later.'],
+          ['Enter amount', 'Recorder types “60.” The app parses it as $60.00 internally.', 'Why: money must become exact cents before calculation.'],
+          ['Pick payer', 'Recorder chooses Alex as the person who paid.', 'Why: the payer gets credited for fronting the bill.'],
+          ['Save with default split', 'Everyone is included at weight 1 unless Advanced split is opened.', 'Outcome: balances and settlement update immediately.']
+        ]
+      },
+      {
+        id: 'weighted', label: 'Weighted split', actor: 'Recorder', priority: 'Sub-flow',
+        goal: 'Handle an uneven expense without slowing down normal equal splits.',
+        steps: [
+          ['Start like equal split', 'Title, amount, and payer are entered first.', 'Why: weighted split should not change the simple path.'],
+          ['Open Advanced split', 'Recorder expands the advanced section only when shares are uneven.', 'Why: complexity is hidden until needed.'],
+          ['Adjust weights', 'Alex can be weight 2 while Mina and Sam stay weight 1.', 'Why: weight 2 means Alex owes twice the share of weight 1.'],
+          ['Save and explain', 'The receipt card shows the resulting payment suggestion.', 'Outcome: uneven costs are handled without manual spreadsheet math.']
+        ]
+      },
+      {
+        id: 'settle', label: 'Settle up', actor: 'Any member', priority: 'Main flow',
+        goal: 'Answer who pays whom, with enough proof to trust it.',
+        steps: [
+          ['Go to Settle', 'User taps the sticky Settle anchor or scrolls to the Settlement area.', 'Why: on mobile, settlement may be below the form.'],
+          ['Read net balances', 'Each person shows a signed balance and a non-color cue.', 'Why: users need meaning, not just numbers.'],
+          ['Read receipt card', 'The app says “Mina pays Alex $20.00” and explains what that clears.', 'Why: receipt-style explanation builds trust.'],
+          ['Copy summary', 'Organizer can copy a plain-text summary to messages.', 'Outcome: the group can settle outside the app.']
+        ]
+      },
+      {
+        id: 'correct', label: 'Correct mistake', actor: 'Recorder', priority: 'Sub-flow',
+        goal: 'Fix wrong amounts, payer, participants, or deleted entries.',
+        steps: [
+          ['Find recent expense', 'Expense list shows recent items like Dinner and Boat tickets.', 'Why: mistakes are usually noticed soon after entry.'],
+          ['Edit or delete', 'Recorder uses accessible row actions to update or remove the expense.', 'Why: correction should not require rebuilding the trip.'],
+          ['Save correction', 'The same reducer updates trip state.', 'Why: one mutation path keeps the app predictable.'],
+          ['Settlement recalculates', 'Balances and receipt cards update immediately.', 'Outcome: trip state stays accurate.']
+        ]
+      },
+      {
+        id: 'return', label: 'Return later', actor: 'Any user', priority: 'Trust flow',
+        goal: 'Continue after reload without re-entering the trip.',
+        steps: [
+          ['Trip auto-saves', 'After each change, the app writes a validated snapshot to localStorage.', 'Why: no account or backend exists in Phase 1.'],
+          ['Browser reloads', 'User returns to the same device and browser.', 'Why: the product boundary is local-first single-device.'],
+          ['State restores', 'People, expenses, and settlement come back.', 'Why: persistence is part of the north star.'],
+          ['Bad data is safe', 'Unreadable storage falls back to an empty usable trip and flags invalid expenses.', 'Outcome: corrupt data does not break the app.']
+        ]
+      }
+    ];
+
+    const mocks = {
+      setup: [
+        ['People', ['Alex', 'Mina', 'Sam'], true], ['Expenses', ['Payer options now available', 'Equal split default ready'], false], ['Settlement', ['Nothing to settle yet'], false]
+      ],
+      equal: [
+        ['People', ['Alex', 'Mina', 'Sam'], false], ['Expenses', ['Dinner · $60.00 · paid by Alex', 'Split equally across 3 people'], true], ['Settlement', ['Mina pays Alex $20.00', 'Sam pays Alex $20.00'], true]
+      ],
+      weighted: [
+        ['Advanced split', ['Alex weight 2', 'Mina weight 1', 'Sam weight 1'], true], ['Expenses', ['Boat tickets · $80.00 · paid by Mina'], false], ['Settlement', ['Receipt explains weighted share'], true]
+      ],
+      settle: [
+        ['Balances', ['Alex gets back money', 'Mina owes money', 'Sam owes money'], true], ['Receipt', ['Mina → Alex $20.00', 'Clears Mina balance and reduces Alex balance'], true], ['Share', ['Copy settlement summary'], false]
+      ],
+      correct: [
+        ['Recent expenses', ['Dinner · Edit', 'Boat tickets · Delete'], true], ['State', ['Expense updated in reducer'], false], ['Settlement', ['Recalculated immediately'], true]
+      ],
+      return: [
+        ['Storage', ['Validated snapshot saved'], true], ['Reload', ['Trip restored on this browser'], false], ['Fallback', ['Invalid stored data ignored safely'], true]
+      ]
+    };
+
+    let activeJourney = 0;
+    let activeStep = 0;
+
+    const journeyButtons = document.getElementById('journeyButtons');
+    const journeyName = document.getElementById('journeyName');
+    const journeyGoal = document.getElementById('journeyGoal');
+    const actorBadge = document.getElementById('actorBadge');
+    const priorityBadge = document.getElementById('priorityBadge');
+    const stepNum = document.getElementById('stepNum');
+    const stepTitle = document.getElementById('stepTitle');
+    const stepBody = document.getElementById('stepBody');
+    const stepWhy = document.getElementById('stepWhy');
+    const progressFill = document.getElementById('progressFill');
+    const mockApp = document.getElementById('mockApp');
+    const summaryText = document.getElementById('summaryText');
+
+    function renderJourneyButtons() {
+      journeyButtons.innerHTML = '';
+      journeys.forEach((journey, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'journey-button';
+        button.setAttribute('aria-pressed', String(index === activeJourney));
+        button.innerHTML = `<span class="journey-title">${journey.label}</span><span class="journey-meta">${journey.actor} · ${journey.priority}</span>`;
+        button.addEventListener('click', () => { activeJourney = index; activeStep = 0; render(); });
+        journeyButtons.appendChild(button);
+      });
+    }
+
+    function renderMock(id) {
+      mockApp.innerHTML = '';
+      mocks[id].forEach(([title, rows, focal]) => {
+        const panel = document.createElement('div');
+        panel.className = `mock-panel ${focal ? 'mock-focal' : ''}`;
+        panel.innerHTML = `<strong>${title}</strong>` + rows.map(row => `<div class="mock-row"><span>${row}</span></div>`).join('');
+        mockApp.appendChild(panel);
+      });
+    }
+
+    function renderSummary(journey) {
+      const lines = [
+        `Use case: ${journey.label}`,
+        `Actor: ${journey.actor}`,
+        `Priority: ${journey.priority}`,
+        `Goal: ${journey.goal}`,
+        '',
+        'Journey:',
+        ...journey.steps.map((step, i) => `${i + 1}. ${step[0]} — ${step[1]}`),
+        '',
+        'Design rule: keep the main path fast; put rare complexity behind disclosure or explanation.'
+      ];
+      summaryText.value = lines.join('\n');
+    }
+
+    function render() {
+      const journey = journeys[activeJourney];
+      const step = journey.steps[activeStep];
+      renderJourneyButtons();
+      journeyName.textContent = journey.label;
+      journeyGoal.textContent = journey.goal;
+      actorBadge.textContent = journey.actor;
+      priorityBadge.textContent = journey.priority;
+      stepNum.textContent = `Step ${activeStep + 1} of ${journey.steps.length}`;
+      stepTitle.textContent = step[0];
+      stepBody.textContent = step[1];
+      stepWhy.textContent = step[2];
+      progressFill.style.width = `${((activeStep + 1) / journey.steps.length) * 100}%`;
+      renderMock(journey.id);
+      renderSummary(journey);
+    }
+
+    document.getElementById('prevStep').addEventListener('click', () => {
+      activeStep = Math.max(0, activeStep - 1);
+      render();
+    });
+    document.getElementById('nextStep').addEventListener('click', () => {
+      const journey = journeys[activeJourney];
+      if (activeStep < journey.steps.length - 1) activeStep += 1;
+      else { activeJourney = (activeJourney + 1) % journeys.length; activeStep = 0; }
+      render();
+    });
+    document.getElementById('resetWalkthrough').addEventListener('click', () => { activeJourney = 0; activeStep = 0; render(); });
+    document.getElementById('copySummary').addEventListener('click', async () => {
+      const toast = document.getElementById('copyToast');
+      try {
+        await navigator.clipboard.writeText(summaryText.value);
+        toast.textContent = 'Copied current journey summary.';
+      } catch {
+        summaryText.select();
+        toast.textContent = 'Select the text and copy it manually.';
+      }
+    });
+
+    const simulations = {
+      equal: {
+        title: 'Why settlement says “Mina pays Alex.”',
+        lede: 'In this example, Alex paid $60 for dinner split equally among Alex, Mina, and Sam.',
+        rows: ['Dinner: Alex paid $60.00', 'Each person owes $20.00', 'Alex paid $60 and owed $20, so Alex should receive $40 total', 'Mina pays Alex $20.00; Sam pays Alex $20.00']
+      },
+      weighted: {
+        title: 'Why weighted split changes each person’s share.',
+        lede: 'In this example, Mina paid $80 for boat tickets; Alex has weight 2 while Mina and Sam have weight 1.',
+        rows: ['Boat: Mina paid $80.00', 'Weights: Alex 2, Mina 1, Sam 1', 'Total weight is 4, so one weight unit is $20.00', 'Alex owes $40.00; Mina owes $20.00; Sam owes $20.00', 'Net effect: Alex pays Mina $40.00 and Sam pays Mina $20.00']
+      }
+    };
+    function renderSim(id) {
+      document.querySelectorAll('[data-sim]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.sim === id)));
+      const sim = simulations[id];
+      document.getElementById('simTitle').textContent = sim.title;
+      document.getElementById('simLede').textContent = sim.lede;
+      const out = document.getElementById('simOutput');
+      out.innerHTML = sim.rows.map((row, i) => `<div class="mock-panel ${i === sim.rows.length - 1 ? 'mock-focal' : ''}">${row}</div>`).join('');
+    }
+    document.querySelectorAll('[data-sim]').forEach(btn => btn.addEventListener('click', () => renderSim(btn.dataset.sim)));
+
+    render();
+    renderSim('equal');
+  </script>
+</body>
+</html>

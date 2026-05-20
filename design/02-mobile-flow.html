@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Split — Mobile Flow (iOS Tab Bar)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-app:        #f6f4ee;
+      --bg-panel:      #fffdf8;
+      --bg-row:        #fbf8ef;
+      --text-primary:  #172018;
+      --text-muted:    #465145;
+      --text-subtle:   #667064;
+      --accent:        #244732;
+      --accent-soft:   #3f6f56;
+      --accent-pill:   #e1eadf;
+      --secondary:     #e8e2d2;
+      --border:        #d8d3c3;
+      --border-row:    #e2ddcf;
+      --border-input:  #c9c4b6;
+      --border-dashed: #cac1ac;
+      --positive:      #1e6b43;
+      --negative:      #a33d2d;
+      --ios-gray:      #8E8E93;
+      --font-display:  'Fraunces', Georgia, serif;
+      --font-body:     'DM Sans', ui-sans-serif, sans-serif;
+      --font-mono:     'DM Mono', 'SF Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      background: #1c1c1e;
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    body { min-height: 100vh; padding: 40px 28px 60px; }
+
+    /* ── Page header ────────────────────────────────────────────── */
+    .page-header { margin-bottom: 40px; }
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .page-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #666;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── HIG note ───────────────────────────────────────────────── */
+    .hig-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgb(36 71 50 / .15);
+      border: 1px solid rgb(36 71 50 / .3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 36px;
+      max-width: 860px;
+    }
+    .hig-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 4px;
+      padding: 3px 8px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .hig-text {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+    .hig-text strong { color: #e1eadf; }
+
+    /* ── Phones row ─────────────────────────────────────────────── */
+    .phones-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .phone-block { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+    /* ── iPhone 14-class frame ──────────────────────────────────── */
+    /*
+      Logical dimensions: 390 × 844pt
+      We display at 375 × 780 for compactness.
+      All insets mirror real iOS:
+        status bar: 54px (includes dynamic island clearance)
+        nav bar: 44px
+        tab bar: 49px
+        home indicator: 34px
+    */
+    .phone {
+      width: 375px;
+      height: 780px;
+      background: var(--bg-app);
+      border-radius: 44px;
+      box-shadow:
+        0 0 0 1px #3a3a3c,
+        0 0 0 9px #1c1c1e,
+        0 0 0 11px #3a3a3c,
+        0 28px 64px rgb(0 0 0 / .6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Dynamic island */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    /* ── Status bar ─────────────────────────────────────────────── */
+    .status-bar {
+      height: 54px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 24px 8px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .status-time {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-primary);
+    }
+
+    /* ── Navigation bar ─────────────────────────────────────────── */
+    .nav-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      background: rgba(246,244,238,.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-brand-name {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .nav-action {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--secondary);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    /* ── Scrollable content ─────────────────────────────────────── */
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 16px;
+      /* hide scrollbar in mockup */
+      scrollbar-width: none;
+    }
+    .screen-content::-webkit-scrollbar { display: none; }
+
+    /* ── iOS Tab Bar ────────────────────────────────────────────── */
+    /*
+      HIG spec:
+      - Always at the BOTTOM of the screen
+      - Height: 49pt tab bar + 34pt home indicator safe area = 83pt total
+      - Background: ultra-thin material (frosted glass)
+      - Separator: hairline 0.5px at top
+      - Each item: icon (28×28) + label (10pt)
+      - Selected: app accent color
+      - Unselected: iOS system gray #8E8E93
+      - Minimum touch target: 44×44pt per item
+    */
+    .tab-bar {
+      height: 83px;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 6px;
+      flex-shrink: 0;
+      background: rgba(246,244,238,.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 0.5px solid rgb(0 0 0 / .12);
+    }
+    .tab-item {
+      flex: 1;
+      height: 49px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+    .tab-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tab-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      color: var(--ios-gray);
+      font-family: var(--font-body);
+    }
+    .tab-item.active .tab-label { color: var(--accent); }
+    .tab-item.active .tab-icon svg { color: var(--accent); }
+    .tab-item .tab-icon svg { color: var(--ios-gray); }
+
+    /* ── Badge on tab item ──────────────────────────────────────── */
+    .tab-badge {
+      position: absolute;
+      top: -2px;
+      right: -4px;
+      min-width: 16px;
+      height: 16px;
+      background: var(--negative);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+    .tab-icon-wrap { position: relative; }
+
+    /* ── Screen label (below phone) ─────────────────────────────── */
+    .screen-label {
+      text-align: center;
+    }
+    .screen-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 5px;
+    }
+    .screen-name {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* ── Panel cards ────────────────────────────────────────────── */
+    .m-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+    .m-card:first-child { margin-top: 12px; }
+    .m-card-inner { padding: 16px; }
+    .m-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .m-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      margin-bottom: 2px;
+    }
+    .m-card-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .m-count {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--accent-pill);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+    }
+
+    /* ── Form elements ──────────────────────────────────────────── */
+    .m-field { display: grid; gap: 5px; margin-bottom: 10px; }
+    .m-field:last-child { margin-bottom: 0; }
+    .m-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .m-input, .m-select {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border: 1.5px solid var(--border-input);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      appearance: none;
+    }
+    .m-input.focused {
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 3px rgb(63 111 86 / .14);
+    }
+    .m-input-mono { font-family: var(--font-mono); font-size: 16px; padding-left: 28px; }
+    .m-amount-wrap { position: relative; }
+    .m-amount-pre {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .m-select-wrap { position: relative; }
+    .m-select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .m-btn-primary {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-top: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── List rows ──────────────────────────────────────────────── */
+    .m-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .m-row:last-child { margin-bottom: 0; }
+    .m-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-pill);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .m-row-name { flex: 1; font-size: 15px; font-weight: 500; }
+    .m-row-meta { font-size: 12px; color: var(--text-subtle); margin-top: 2px; }
+    .m-row-amount { font-family: var(--font-mono); font-size: 14px; font-weight: 500; }
+    .m-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      background: var(--secondary);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── Split hint ─────────────────────────────────────────────── */
+    .split-hint {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 12px;
+      background: var(--accent-pill);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 500;
+      margin: 10px 0;
+    }
+
+    /* ── Disclosure ─────────────────────────────────────────────── */
+    .m-disclosure {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: none;
+      border: 1.5px dashed var(--border-dashed);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-subtle);
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    /* ── Empty state ────────────────────────────────────────────── */
+    .m-empty {
+      padding: 24px 16px;
+      border: 1.5px dashed var(--border-dashed);
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .m-empty-icon { font-size: 28px; margin-bottom: 8px; }
+    .m-empty-title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .m-empty-body { font-size: 12px; color: var(--text-subtle); line-height: 1.5; }
+
+    /* ── Section divider ────────────────────────────────────────── */
+    .m-divider {
+      height: 0.5px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+    .m-section-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 8px;
+    }
+
+    /* ── Balance / Settlement ───────────────────────────────────── */
+    .m-balance-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .m-balance-row:last-child { margin-bottom: 0; }
+    .m-balance-left { display: flex; align-items: center; gap: 10px; }
+    .m-balance-name { font-size: 15px; font-weight: 500; }
+    .m-balance-amount { font-family: var(--font-mono); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .pos { color: var(--positive); }
+    .neg { color: var(--negative); }
+    .zer { color: var(--text-subtle); }
+
+    /* ── Receipt card ───────────────────────────────────────────── */
+    .receipt {
+      border: 1.5px solid var(--accent-soft);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .receipt-head {
+      background: var(--accent);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .receipt-parties {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .receipt-amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+    }
+    .receipt-body {
+      padding: 11px 14px;
+      background: var(--bg-panel);
+      font-size: 12px;
+      color: var(--text-subtle);
+      line-height: 1.55;
+    }
+    .m-settlement-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .m-settlement-row:last-child { margin-bottom: 0; }
+
+    /* ── Disabled / locked state ────────────────────────────────── */
+    .locked { opacity: 0.38; pointer-events: none; }
+
+    /* ── Info callout ───────────────────────────────────────────── */
+    .m-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--text-subtle);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">Travel Split — Mobile Flow</div>
+  <div class="page-meta">375pt · iOS Tab Bar · Apple HIG compliant · Warm paper + forest ink</div>
+</div>
+
+<div class="hig-note">
+  <span class="hig-badge">HIG Fix</span>
+  <p class="hig-text">
+    <strong>Tab bars always appear at the bottom of the screen.</strong> The previous "anchor rail" positioned between the header and content was a segmented control pattern — correct for filtering within one view, wrong for navigating between distinct app sections. The bottom tab bar stays fixed, gives each section persistent state, and places navigation in the natural thumb zone. Safe area inset (34pt) is respected above the home indicator.
+  </p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="phones-row">
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- PHONE A: People tab — empty state, first launch                 -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <div class="phone-block">
+    <div class="phone">
+      <div class="dynamic-island"></div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="1.5" width="3" height="10.5" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C10.5 2.5 12.7 3.5 14.2 5.1L15.5 3.7C13.6 1.7 11 .5 8 .5S2.4 1.7.5 3.7L1.8 5.1C3.3 3.5 5.5 2.5 8 2.5z"/><path d="M8 5.5C9.7 5.5 11.2 6.2 12.3 7.3L13.6 5.9C12.1 4.5 10.2 3.5 8 3.5S3.9 4.5 2.4 5.9L3.7 7.3C4.8 6.2 6.3 5.5 8 5.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor" fill-opacity=".9"/><path opacity=".4" d="M25 4.5v4a2 2 0 000-4z" fill="currentColor"/></svg>
+        </div>
+      </div>
+
+      <!-- Nav bar -->
+      <div class="nav-bar">
+        <div class="nav-title">
+          <div class="nav-brand-icon">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V9h6v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-brand-name">Travel Split</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="screen-content">
+        <div class="m-card">
+          <div class="m-card-inner">
+            <div class="m-card-head">
+              <div>
+                <div class="m-eyebrow">People</div>
+                <div class="m-card-title">Trip group</div>
+              </div>
+              <span class="m-count">0</span>
+            </div>
+
+            <div class="m-field">
+              <label class="m-label">Add someone</label>
+              <input class="m-input focused" type="text" placeholder="Name">
+            </div>
+
+            <div class="m-btn-primary">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add to trip
+            </div>
+          </div>
+        </div>
+
+        <div class="m-empty">
+          <div class="m-empty-icon">🧳</div>
+          <div class="m-empty-title">No one added yet</div>
+          <div class="m-empty-body">Type a name above to add the first traveler. Everyone should be added before recording expenses.</div>
+        </div>
+      </div>
+
+      <!-- iOS Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab-item active">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <span class="tab-label" style="color:var(--accent);">People</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <span class="tab-label">Expenses</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z" stroke="currentColor" stroke-width="1.8"/><path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <span class="tab-label">Settle</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-label">
+      <div class="screen-badge">Screen A</div>
+      <div class="screen-name">People tab · empty state<br>Auto-focused input on first launch</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- PHONE B: People tab — 4 members, blocked vs allowed remove      -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <div class="phone-block">
+    <div class="phone">
+      <div class="dynamic-island"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="1.5" width="3" height="10.5" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C10.5 2.5 12.7 3.5 14.2 5.1L15.5 3.7C13.6 1.7 11 .5 8 .5S2.4 1.7.5 3.7L1.8 5.1C3.3 3.5 5.5 2.5 8 2.5z"/><path d="M8 5.5C9.7 5.5 11.2 6.2 12.3 7.3L13.6 5.9C12.1 4.5 10.2 3.5 8 3.5S3.9 4.5 2.4 5.9L3.7 7.3C4.8 6.2 6.3 5.5 8 5.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor" fill-opacity=".9"/><path opacity=".4" d="M25 4.5v4a2 2 0 000-4z" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-title">
+          <div class="nav-brand-icon">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V9h6v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-brand-name">Travel Split</span>
+        </div>
+      </div>
+
+      <div class="screen-content">
+        <div class="m-card">
+          <div class="m-card-inner">
+            <div class="m-card-head">
+              <div>
+                <div class="m-eyebrow">People</div>
+                <div class="m-card-title">Trip group</div>
+              </div>
+              <span class="m-count">4</span>
+            </div>
+
+            <div class="m-field">
+              <label class="m-label">Add someone</label>
+              <input class="m-input" type="text" placeholder="Name">
+            </div>
+            <div class="m-btn-primary" style="height:44px;font-size:15px;border-radius:10px;margin-top:8px;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add to trip
+            </div>
+
+            <div class="m-divider"></div>
+
+            <!-- Alex — blocked (in expense) -->
+            <div class="m-row">
+              <div class="m-avatar">A</div>
+              <span class="m-row-name">Alex</span>
+              <div class="m-icon-btn locked" style="cursor:not-allowed;" title="Used in an expense">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+            <!-- Mina — blocked -->
+            <div class="m-row">
+              <div class="m-avatar" style="background:#deebd9;">M</div>
+              <span class="m-row-name">Mina</span>
+              <div class="m-icon-btn locked" style="cursor:not-allowed;" title="Used in an expense">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+            <!-- Sam — blocked -->
+            <div class="m-row">
+              <div class="m-avatar" style="background:#ede8df;">S</div>
+              <span class="m-row-name">Sam</span>
+              <div class="m-icon-btn locked" style="cursor:not-allowed;">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+            <!-- Jo — removable -->
+            <div class="m-row">
+              <div class="m-avatar" style="background:#e8e3d8;">J</div>
+              <span class="m-row-name">Jo</span>
+              <div class="m-icon-btn">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+
+            <div class="m-info">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Dimmed removes are blocked — that person is referenced by an expense.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-item active">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label" style="color:var(--accent);">People</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <span class="tab-badge">3</span>
+          </div>
+          <span class="tab-label">Expenses</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z" stroke="currentColor" stroke-width="1.8"/><path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label">Settle</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-label">
+      <div class="screen-badge">Screen B</div>
+      <div class="screen-name">People tab · 4 members<br>Blocked (dimmed) vs. active remove</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- PHONE C: Expenses tab — fast path (4 fields + save)            -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <div class="phone-block">
+    <div class="phone">
+      <div class="dynamic-island"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="1.5" width="3" height="10.5" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C10.5 2.5 12.7 3.5 14.2 5.1L15.5 3.7C13.6 1.7 11 .5 8 .5S2.4 1.7.5 3.7L1.8 5.1C3.3 3.5 5.5 2.5 8 2.5z"/><path d="M8 5.5C9.7 5.5 11.2 6.2 12.3 7.3L13.6 5.9C12.1 4.5 10.2 3.5 8 3.5S3.9 4.5 2.4 5.9L3.7 7.3C4.8 6.2 6.3 5.5 8 5.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor" fill-opacity=".9"/><path opacity=".4" d="M25 4.5v4a2 2 0 000-4z" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-title">
+          <div class="nav-brand-icon">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V9h6v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-brand-name">Travel Split</span>
+        </div>
+      </div>
+
+      <div class="screen-content">
+        <div class="m-card">
+          <div class="m-card-inner">
+            <div class="m-card-head">
+              <div>
+                <div class="m-eyebrow">Expenses</div>
+                <div class="m-card-title">Activities &amp; costs</div>
+              </div>
+              <span class="m-count">2</span>
+            </div>
+
+            <!-- GOLDEN PATH: 4 fields only -->
+            <div class="m-field">
+              <label class="m-label">Title</label>
+              <input class="m-input focused" type="text" value="Dinner" placeholder="e.g. Dinner, Boat…">
+            </div>
+
+            <div class="m-field">
+              <label class="m-label">Amount</label>
+              <div class="m-amount-wrap">
+                <span class="m-amount-pre">$</span>
+                <input class="m-input m-input-mono" type="text" value="80.00" inputmode="decimal">
+              </div>
+            </div>
+
+            <div class="m-field">
+              <label class="m-label">Paid by</label>
+              <div class="m-select-wrap">
+                <select class="m-select">
+                  <option selected>Alex</option>
+                  <option>Mina</option>
+                  <option>Sam</option>
+                  <option>Jo</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Auto-split hint — confirms default with zero interaction -->
+            <div class="split-hint">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Split equally across 4 people
+            </div>
+
+            <!-- Customize — collapsed, optional -->
+            <button class="m-disclosure">
+              <span>Customize split</span>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <!-- Primary CTA — always in view above keyboard -->
+            <div class="m-btn-primary">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Save expense
+            </div>
+
+            <div class="m-divider"></div>
+            <div class="m-section-label">Recent</div>
+
+            <div class="m-row" style="align-items:flex-start;">
+              <div style="flex:1;">
+                <div class="m-row-name">Hotel (2 nights)</div>
+                <div class="m-row-meta">Paid by Mina · 4 people</div>
+              </div>
+              <span class="m-row-amount">$340.00</span>
+              <div class="m-icon-btn">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+
+            <div class="m-row" style="align-items:flex-start;">
+              <div style="flex:1;">
+                <div class="m-row-name">Boat tickets</div>
+                <div class="m-row-meta">Paid by Sam · 3 people · weighted</div>
+              </div>
+              <span class="m-row-amount">$120.00</span>
+              <div class="m-icon-btn">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-item">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label">People</span>
+        </button>
+        <button class="tab-item active">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <span class="tab-label" style="color:var(--accent);">Expenses</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z" stroke="currentColor" stroke-width="1.8"/><path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label">Settle</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-label">
+      <div class="screen-badge">Screen C</div>
+      <div class="screen-name">Expenses tab · fast path (4 fields)<br>Split hint confirms default · Customize collapsed</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <!-- PHONE D: Settle tab — balances + receipt card                   -->
+  <!-- ─────────────────────────────────────────────────────────────── -->
+  <div class="phone-block">
+    <div class="phone">
+      <div class="dynamic-island"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="1.5" width="3" height="10.5" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C10.5 2.5 12.7 3.5 14.2 5.1L15.5 3.7C13.6 1.7 11 .5 8 .5S2.4 1.7.5 3.7L1.8 5.1C3.3 3.5 5.5 2.5 8 2.5z"/><path d="M8 5.5C9.7 5.5 11.2 6.2 12.3 7.3L13.6 5.9C12.1 4.5 10.2 3.5 8 3.5S3.9 4.5 2.4 5.9L3.7 7.3C4.8 6.2 6.3 5.5 8 5.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor" fill-opacity=".9"/><path opacity=".4" d="M25 4.5v4a2 2 0 000-4z" fill="currentColor"/></svg>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-title">
+          <div class="nav-brand-icon">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V9h6v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-brand-name">Travel Split</span>
+        </div>
+        <!-- Copy summary action in nav bar (right side) -->
+        <button class="nav-action" title="Copy settlement summary">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </div>
+
+      <div class="screen-content">
+        <div class="m-card">
+          <div class="m-card-inner">
+            <div class="m-card-head">
+              <div>
+                <div class="m-eyebrow">Settlement</div>
+                <div class="m-card-title">Who pays whom</div>
+              </div>
+            </div>
+
+            <div class="m-section-label">Net balances</div>
+
+            <div class="m-balance-row">
+              <div class="m-balance-left">
+                <div class="m-avatar">A</div>
+                <span class="m-balance-name">Alex</span>
+              </div>
+              <span class="m-balance-amount pos">▲ +$28.00</span>
+            </div>
+            <div class="m-balance-row">
+              <div class="m-balance-left">
+                <div class="m-avatar" style="background:#deebd9;">M</div>
+                <span class="m-balance-name">Mina</span>
+              </div>
+              <span class="m-balance-amount pos">▲ +$255.00</span>
+            </div>
+            <div class="m-balance-row">
+              <div class="m-balance-left">
+                <div class="m-avatar" style="background:#ede8df;">S</div>
+                <span class="m-balance-name">Sam</span>
+              </div>
+              <span class="m-balance-amount neg">▼ −$163.00</span>
+            </div>
+            <div class="m-balance-row">
+              <div class="m-balance-left">
+                <div class="m-avatar" style="background:#e8e3d8;">J</div>
+                <span class="m-balance-name">Jo</span>
+              </div>
+              <span class="m-balance-amount neg">▼ −$120.00</span>
+            </div>
+
+            <div class="m-divider"></div>
+            <div class="m-section-label">Suggested payments</div>
+
+            <!-- Expanded receipt card (tapped) -->
+            <div class="receipt">
+              <div class="receipt-head">
+                <div class="receipt-parties">
+                  <span>Sam</span>
+                  <span style="opacity:.65">→</span>
+                  <span>Mina</span>
+                </div>
+                <span class="receipt-amount">$163.00</span>
+              </div>
+              <div class="receipt-body">
+                This clears <strong style="color:var(--text-muted)">Sam's −$163.00</strong> balance and reduces Mina's +$255.00 to <strong style="color:var(--text-muted)">+$92.00</strong>.
+              </div>
+            </div>
+
+            <!-- Collapsed rows -->
+            <div class="m-settlement-row">
+              <span style="font-size:14px;font-weight:600;">Jo</span>
+              <span style="color:var(--text-subtle);font-size:13px;">→</span>
+              <span style="font-size:14px;font-weight:600;">Mina</span>
+              <span style="flex:1;"></span>
+              <span style="font-family:var(--font-mono);font-size:14px;font-weight:500;">$92.00</span>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="color:var(--text-subtle);"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="m-settlement-row">
+              <span style="font-size:14px;font-weight:600;">Jo</span>
+              <span style="color:var(--text-subtle);font-size:13px;">→</span>
+              <span style="font-size:14px;font-weight:600;">Alex</span>
+              <span style="flex:1;"></span>
+              <span style="font-family:var(--font-mono);font-size:14px;font-weight:500;">$28.00</span>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="color:var(--text-subtle);"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="m-info">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Tap a payment row to see the receipt explanation. All amounts precise to the cent.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-item">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label">People</span>
+        </button>
+        <button class="tab-item">
+          <div class="tab-icon-wrap">
+            <div class="tab-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <span class="tab-label">Expenses</span>
+        </button>
+        <button class="tab-item active">
+          <div class="tab-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z" stroke="currentColor" stroke-width="1.8"/><path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tab-label" style="color:var(--accent);">Settle</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-label">
+      <div class="screen-badge">Screen D</div>
+      <div class="screen-name">Settle tab · net balances + receipt card<br>Copy summary in nav bar (right)</div>
+    </div>
+  </div>
+
+</div><!-- /phones-row -->
+
+</body>
+</html>

@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Split — User Journey Map + Use Case Priorities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-app:       #f6f4ee;
+      --bg-panel:     #fffdf8;
+      --bg-row:       #fbf8ef;
+      --text-primary: #172018;
+      --text-muted:   #465145;
+      --text-subtle:  #667064;
+      --accent:       #244732;
+      --accent-soft:  #3f6f56;
+      --accent-pill:  #e1eadf;
+      --secondary:    #e8e2d2;
+      --border:       #d8d3c3;
+      --border-row:   #e2ddcf;
+      --positive:     #1e6b43;
+      --negative:     #a33d2d;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', ui-sans-serif, sans-serif;
+      --font-mono:    'DM Mono', 'SF Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg-app);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgb(36 71 50 / .04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgb(36 71 50 / .03) 0%, transparent 60%);
+    }
+
+    .page {
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    /* ── Page header ────────────────────────────────────────────────── */
+    .page-header { margin-bottom: 48px; }
+
+    .doc-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      margin-bottom: 8px;
+    }
+
+    .doc-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .doc-subtitle {
+      font-size: 16px;
+      color: var(--text-subtle);
+      max-width: 640px;
+      line-height: 1.6;
+    }
+
+    /* ── Section headings ───────────────────────────────────────────── */
+    .section { margin-bottom: 56px; }
+
+    .section-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    /* ── Card ───────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgb(23 32 24 / .05), 0 6px 20px rgb(23 32 24 / .06);
+    }
+
+    /* ── Priority table ─────────────────────────────────────────────── */
+    .priority-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .priority-col-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .label-main { background: var(--accent); color: #fff; }
+    .label-sub { background: var(--secondary); color: var(--text-muted); }
+
+    .uc-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .uc-row:last-child { margin-bottom: 0; }
+
+    .uc-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .uc-num.sub { background: var(--text-subtle); }
+
+    .uc-content { flex: 1; }
+
+    .uc-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .uc-desc {
+      font-size: 12px;
+      color: var(--text-subtle);
+      line-height: 1.5;
+    }
+
+    .uc-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .tag-always { background: var(--accent-pill); color: var(--accent); }
+    .tag-optional { background: var(--secondary); color: var(--text-muted); }
+
+    /* ── Journey flow ───────────────────────────────────────────────── */
+    .journey-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .journey-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgb(23 32 24 / .05), 0 6px 20px rgb(23 32 24 / .06);
+    }
+
+    .journey-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .journey-actor-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .journey-actor-icon.secondary { background: var(--secondary); }
+
+    .journey-actor-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      margin-bottom: 2px;
+    }
+
+    .journey-actor-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .journey-body { padding: 20px; }
+
+    /* ── Flow steps ─────────────────────────────────────────────────── */
+    .flow-steps { position: relative; }
+
+    .flow-step {
+      display: flex;
+      gap: 14px;
+      padding-bottom: 20px;
+      position: relative;
+    }
+
+    .flow-step:last-child { padding-bottom: 0; }
+
+    /* Connecting line */
+    .flow-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 32px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .flow-step.main:not(:last-child)::before { background: var(--accent-pill); }
+
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .step-dot.sub { background: var(--secondary); color: var(--text-muted); }
+    .step-dot.outcome { background: var(--positive); }
+
+    .step-content { flex: 1; padding-top: 5px; }
+
+    .step-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .step-detail {
+      font-size: 12px;
+      color: var(--text-subtle);
+      line-height: 1.5;
+    }
+
+    .step-callout {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .callout-fast { background: var(--accent-pill); color: var(--accent); }
+    .callout-opt { background: var(--secondary); color: var(--text-muted); }
+    .callout-auto { background: rgb(30 107 67 / .12); color: var(--positive); }
+
+    /* ── Design decisions table ─────────────────────────────────────── */
+    .decision-grid { display: grid; gap: 10px; }
+
+    .decision-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 12px 14px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: 8px;
+    }
+
+    .decision-key {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .decision-val {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .decision-val em {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--accent-soft);
+    }
+
+    /* ── HIG note box ───────────────────────────────────────────────── */
+    .hig-box {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--accent-pill);
+      border: 1px solid rgb(36 71 50 / .15);
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .hig-icon { font-size: 16px; }
+
+    .hig-text {
+      font-size: 13px;
+      color: var(--accent);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    /* ── Horizontal rule ────────────────────────────────────────────── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="doc-kicker">Travel Split · UX Design · v1.0</div>
+    <h1 class="doc-title">User Journeys &amp;<br>Use Case Priorities</h1>
+    <p class="doc-subtitle">Two actor journeys, three main flows, four sub-flows. Designed so the organizer can record an expense in 4 taps and the member can read their settlement in 2 seconds.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: Use case priorities                                   -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-kicker">Section 1</div>
+    <h2 class="section-title">Use Case Priorities</h2>
+
+    <div class="priority-grid">
+
+      <!-- Main flows -->
+      <div>
+        <span class="priority-col-label label-main">● Main flows — critical path</span>
+        <p style="font-size:13px;color:var(--text-subtle);margin-bottom:14px;line-height:1.5;">Always visible. No extra steps. User finishes the job in the fewest possible taps.</p>
+
+        <div class="uc-row">
+          <span class="uc-num">UC-1</span>
+          <div class="uc-content">
+            <div class="uc-title">Add trip members</div>
+            <div class="uc-desc">Type a name, tap Add. Prerequisite for everything else. Auto-focused on first launch.</div>
+            <span class="uc-tag tag-always">First action</span>
+          </div>
+        </div>
+
+        <div class="uc-row">
+          <span class="uc-num">UC-2</span>
+          <div class="uc-content">
+            <div class="uc-title">Record an equal-split expense</div>
+            <div class="uc-desc">Title → Amount → Paid by → Save. 4 fields. Default split is always equal across all members. No extra decision required.</div>
+            <span class="uc-tag tag-always">Golden path — 4 taps</span>
+          </div>
+        </div>
+
+        <div class="uc-row">
+          <span class="uc-num">UC-4</span>
+          <div class="uc-content">
+            <div class="uc-title">Review balances and settle up</div>
+            <div class="uc-desc">Net balance per person with ▲/▼ indicator (not color-only). Suggested payments with receipt-style explanation. Updates live as expenses change.</div>
+            <span class="uc-tag tag-always">Outcome screen</span>
+          </div>
+        </div>
+
+        <div class="hig-box">
+          <span class="hig-icon">✦</span>
+          <span class="hig-text">HIG: Primary actions always in thumb reach. Form fields above the keyboard's safe area. Settlement teaser stays visible at the bottom so the outcome is never hidden during entry.</span>
+        </div>
+      </div>
+
+      <!-- Sub-flows -->
+      <div>
+        <span class="priority-col-label label-sub">○ Sub-flows — advanced, optional</span>
+        <p style="font-size:13px;color:var(--text-subtle);margin-bottom:14px;line-height:1.5;">Hidden behind disclosure patterns. Power users opt in. Never interrupt the fast path.</p>
+
+        <div class="uc-row">
+          <span class="uc-num sub">UC-3</span>
+          <div class="uc-content">
+            <div class="uc-title">Weighted custom split</div>
+            <div class="uc-desc">Hidden behind "Customize split" accordion inside the expense form. Lets recorder exclude participants or set weights &gt; 1. Helper text shows current split state at all times.</div>
+            <span class="uc-tag tag-optional">Disclosure / accordion</span>
+          </div>
+        </div>
+
+        <div class="uc-row">
+          <span class="uc-num sub">UC-5</span>
+          <div class="uc-content">
+            <div class="uc-title">Edit or delete an expense</div>
+            <div class="uc-desc">Edit/delete icons per row in the expense list. Edit re-opens the form prefilled. Delete requires a second confirm. Settlement updates immediately.</div>
+            <span class="uc-tag tag-optional">Row actions</span>
+          </div>
+        </div>
+
+        <div class="uc-row">
+          <span class="uc-num sub">UC-6</span>
+          <div class="uc-content">
+            <div class="uc-title">Remove a person</div>
+            <div class="uc-desc">Remove button blocked (disabled) if person appears in any expense. Tooltip explains why. Unused people can be removed freely.</div>
+            <span class="uc-tag tag-optional">Guarded action</span>
+          </div>
+        </div>
+
+        <div class="uc-row">
+          <span class="uc-num sub">UC-7</span>
+          <div class="uc-content">
+            <div class="uc-title">Copy settlement summary</div>
+            <div class="uc-desc">One button copies plain-text settlement to clipboard for sharing via Messages/WhatsApp. No accounts, no server. Local only.</div>
+            <span class="uc-tag tag-optional">Share affordance</span>
+          </div>
+        </div>
+
+        <div class="hig-box">
+          <span class="hig-icon">✦</span>
+          <span class="hig-text">HIG: Destructive actions (delete) are never the default. Blocked states explain themselves inline — never silent failures. Advanced controls live inside disclosure to preserve visual calm.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: Actor A journey — Trip Organizer                      -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-kicker">Section 2</div>
+    <h2 class="section-title">Actor Journeys</h2>
+
+    <div class="journey-grid">
+
+      <!-- Actor A: Trip Organizer -->
+      <div class="journey-card">
+        <div class="journey-head">
+          <div class="journey-actor-icon">🗺️</div>
+          <div>
+            <div class="journey-actor-label">Actor A</div>
+            <div class="journey-actor-name">Trip Organizer</div>
+          </div>
+        </div>
+        <div class="journey-body">
+          <p style="font-size:13px;color:var(--text-subtle);margin-bottom:20px;line-height:1.5;">
+            The organizer opens the app, builds the group, records expenses during the trip, and shares the final settlement. They interact with the app repeatedly — often at restaurants, museums, or hotels in the moment.
+          </p>
+
+          <div class="flow-steps">
+
+            <div class="flow-step main">
+              <div class="step-dot">1</div>
+              <div class="step-content">
+                <div class="step-label">Open app → workspace appears</div>
+                <div class="step-detail">No splash screen, no setup wizard. The People panel is immediately visible with the name input auto-focused.</div>
+                <span class="step-callout callout-fast">⚡ 0 taps to reach input</span>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot">2</div>
+              <div class="step-content">
+                <div class="step-label">Add all travelers by name</div>
+                <div class="step-detail">Type a name, tap Add, repeat. Order doesn't matter. Names appear as chips in the list. Takes ~5 seconds per person.</div>
+                <span class="step-callout callout-fast">⚡ 2 taps per person</span>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot">3</div>
+              <div class="step-content">
+                <div class="step-label">Record first expense (fast path)</div>
+                <div class="step-detail">Title → Amount → Paid by → Save. All members included by default with equal weight. Settlement updates immediately after save.</div>
+                <span class="step-callout callout-fast">⚡ 4 taps · golden path</span>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="step-dot sub">4</div>
+              <div class="step-content">
+                <div class="step-label">(Optional) Customize the split</div>
+                <div class="step-detail">Tap "Customize split" to reveal participant checkboxes and weight inputs. Exclude someone or give Alex weight 2 for eating twice as much. Helper text confirms the split before saving.</div>
+                <span class="step-callout callout-opt">○ Sub-flow · opt-in</span>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot">5</div>
+              <div class="step-content">
+                <div class="step-label">Continue adding expenses throughout trip</div>
+                <div class="step-detail">Each expense takes 4 taps. The Expenses panel shows a running list. The settlement teaser at the bottom stays visible, previewing the current largest pending payment.</div>
+                <span class="step-callout callout-auto">↻ Repeating action</span>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="step-dot sub">6</div>
+              <div class="step-content">
+                <div class="step-label">(Optional) Correct a mistake</div>
+                <div class="step-detail">Tap the edit icon on any expense row to open it prefilled. Change fields and save. Or tap delete to remove it. Settlement recalculates instantly.</div>
+                <span class="step-callout callout-opt">○ Sub-flow · row action</span>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot outcome">✓</div>
+              <div class="step-content">
+                <div class="step-label">Review settlement — trip done</div>
+                <div class="step-detail">Scroll to Settlement (or tap rail). See net balances with ▲/▼. Read suggested payments: "Sam → Mina $163.00". Tap a payment to see the receipt explanation.</div>
+                <span class="step-callout callout-fast">⚡ Instant, no calculation needed</span>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="step-dot sub">7</div>
+              <div class="step-content">
+                <div class="step-label">(Optional) Share settlement summary</div>
+                <div class="step-detail">Tap "Copy summary" to copy plain text to clipboard. Paste into group chat. Members see who owes what without needing the app.</div>
+                <span class="step-callout callout-opt">○ Sub-flow · clipboard share</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Actor B: Trip Member (receives settlement) -->
+      <div class="journey-card">
+        <div class="journey-head">
+          <div class="journey-actor-icon secondary" style="font-size:20px;">👤</div>
+          <div>
+            <div class="journey-actor-label">Actor B</div>
+            <div class="journey-actor-name">Trip Member</div>
+          </div>
+        </div>
+        <div class="journey-body">
+          <p style="font-size:13px;color:var(--text-subtle);margin-bottom:20px;line-height:1.5;">
+            The member is a participant in the trip. They're named in the app but don't necessarily use it themselves. Their journey is about understanding what they owe and to whom — as simply as possible.
+          </p>
+
+          <div style="background:var(--warning-bg);border:1px solid rgb(109 74 0 / .2);border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#6d4a00;line-height:1.5;">
+            <strong>Note:</strong> This is a local-first, no-account app. Members don't "log in." They receive their settlement info via a shared summary text, or by looking at the organizer's device.
+          </div>
+
+          <!-- Path A: Viewing the app -->
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:10px;">Path A — views the app</div>
+
+          <div class="flow-steps">
+
+            <div class="flow-step main">
+              <div class="step-dot">1</div>
+              <div class="step-content">
+                <div class="step-label">Organizer hands over device or screen-shares</div>
+                <div class="step-detail">Member opens the app on the organizer's device — or the organizer shares their screen.</div>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot">2</div>
+              <div class="step-content">
+                <div class="step-label">Navigate to Settlement section</div>
+                <div class="step-detail">Tap "Settle" in the anchor rail. Immediately sees their name in the net balance list with a clear ▼ indicator and amount.</div>
+                <span class="step-callout callout-fast">⚡ 1 tap</span>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot outcome">✓</div>
+              <div class="step-content">
+                <div class="step-label">Read who to pay and how much</div>
+                <div class="step-detail">E.g. "Sam → Mina $163.00". Tap the row to see receipt explanation: "This clears your −$163.00 balance." Member knows exactly what to do.</div>
+                <span class="step-callout callout-fast">⚡ 2 seconds to understand</span>
+              </div>
+            </div>
+
+          </div>
+
+          <hr style="margin:20px 0;">
+
+          <!-- Path B: Receives copied text -->
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:10px;">Path B — receives copied summary text</div>
+
+          <div class="flow-steps">
+
+            <div class="flow-step main">
+              <div class="step-dot">1</div>
+              <div class="step-content">
+                <div class="step-label">Organizer copies &amp; pastes settlement to group chat</div>
+                <div class="step-detail">Plain text: each person's balance and each suggested payment. No app required to read.</div>
+              </div>
+            </div>
+
+            <div class="flow-step main">
+              <div class="step-dot outcome">✓</div>
+              <div class="step-content">
+                <div class="step-label">Member reads: pay $163 to Mina</div>
+                <div class="step-detail">Message is self-explanatory. Member pays via their preferred method (Venmo, bank transfer, cash) outside the app.</div>
+                <span class="step-callout callout-fast">⚡ No app install needed</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="hig-box" style="margin-top:20px;">
+            <span class="hig-icon">✦</span>
+            <span class="hig-text">Design implication: The settlement view must be readable in one glance. Non-color indicators (▲/▼) and the receipt explanation text mean a member never needs to "figure out" what they owe.</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: Key design decisions                                  -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-kicker">Section 3</div>
+    <h2 class="section-title">Key Design Decisions</h2>
+
+    <div class="card">
+      <div class="decision-grid">
+        <div class="decision-row">
+          <div class="decision-key">Expense entry default</div>
+          <div class="decision-val"><em>4 fields only</em> — title, amount, paid by, save. Equal split across all members is automatic. No checkbox required. Customization is opt-in via disclosure.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Advanced split access</div>
+          <div class="decision-val"><em>Disclosure accordion</em> labelled "Customize split". Collapsed by default. A split-hint badge ("Split equally across 4 people") always confirms the current state so the organizer never wonders what will happen.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Mobile navigation</div>
+          <div class="decision-val"><em>Sticky anchor rail</em> (People | Expenses | Settle) at top, not bottom, to avoid conflict with iOS home indicator. Bottom reserved for the settlement teaser — a persistent reminder of the current suggested payment.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Settlement trust signal</div>
+          <div class="decision-val"><em>Receipt card</em> on tap: explains each payment in plain language, not just numbers. "This clears Sam's −$163.00 balance." Members never doubt the math.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Person removal guard</div>
+          <div class="decision-val"><em>Disabled remove button</em> with tooltip when person is in any expense. Prevents orphaned references. The button is visible but grayed — the organizer understands the constraint without a modal.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Color + non-color cues</div>
+          <div class="decision-val"><em>▲ / ▼ / ◦ indicators</em> alongside green/red amounts. WCAG AA compliant. Users who can't distinguish red from green still understand positive vs. negative balances.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">First launch experience</div>
+          <div class="decision-val"><em>No onboarding modal.</em> App opens directly to workspace. People panel name input is auto-focused. The organizer's first action is already correct — no "skip intro" needed.</div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-key">Share affordance</div>
+          <div class="decision-val"><em>Copy to clipboard only</em> — plain text settlement. No backend, no invite links, no real-time sync. Members don't need the app. Sharing is the organizer's choice, not the app's assumption.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Screen map ────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-kicker">Section 4</div>
+    <h2 class="section-title">Screen Map</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <a href="01-desktop-workspace.html" style="text-decoration:none;">
+        <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;transition:box-shadow .15s;">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-soft);margin-bottom:6px;">Desktop</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">01 — Desktop Workspace</div>
+          <div style="font-size:12px;color:var(--text-subtle);">3-column layout · active trip with data · empty state · advanced split expanded</div>
+        </div>
+      </a>
+      <a href="02-mobile-flow.html" style="text-decoration:none;">
+        <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-soft);margin-bottom:6px;">Mobile</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">02 — Mobile Flow</div>
+          <div style="font-size:12px;color:var(--text-subtle);">4 phone screens · empty state · expense entry · settlement · people management</div>
+        </div>
+      </a>
+      <div style="background:var(--bg-panel);border:1.5px dashed var(--border-dashed);border-radius:10px;padding:18px;opacity:.6;">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-subtle);margin-bottom:6px;">This file</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">00 — Journey Map</div>
+        <div style="font-size:12px;color:var(--text-subtle);">User journeys · use case priorities · design decisions</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+</body>
+</html>

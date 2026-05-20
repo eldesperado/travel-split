@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Split — Desktop Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────────── */
+    :root {
+      --bg-app:       #f6f4ee;
+      --bg-panel:     #fffdf8;
+      --bg-row:       #fbf8ef;
+      --text-primary: #172018;
+      --text-muted:   #465145;
+      --text-subtle:  #667064;
+      --accent:       #244732;
+      --accent-soft:  #3f6f56;
+      --accent-pill:  #e1eadf;
+      --pill-text:    #244732;
+      --secondary:    #e8e2d2;
+      --border:       #d8d3c3;
+      --border-row:   #e2ddcf;
+      --border-input: #c9c4b6;
+      --border-dashed:#cac1ac;
+      --positive:     #1e6b43;
+      --negative:     #a33d2d;
+      --warning-bg:   #fff1cd;
+      --warning-text: #6d4a00;
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', ui-sans-serif, sans-serif;
+      --font-mono:    'DM Mono', 'SF Mono', monospace;
+
+      --radius-panel: 12px;
+      --radius-row:   8px;
+      --radius-input: 8px;
+      --radius-btn:   8px;
+      --shadow-panel: 0 1px 3px rgb(23 32 24 / .06), 0 8px 24px rgb(23 32 24 / .07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      /* Subtle paper texture */
+      background-color: var(--bg-app);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgb(36 71 50 / .04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgb(36 71 50 / .03) 0%, transparent 60%);
+    }
+
+    /* ── App shell ─────────────────────────────────────────────────── */
+    .app-shell {
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 80px;
+    }
+
+    /* ── App header ────────────────────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 24px;
+    }
+
+    .brand-lockup { display: flex; align-items: baseline; gap: 12px; }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      top: 2px;
+    }
+
+    .brand-icon svg { color: #fff; }
+
+    .app-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .app-tagline {
+      font-size: 13px;
+      color: var(--text-subtle);
+      margin-top: 4px;
+    }
+
+    /* ── Workspace grid ────────────────────────────────────────────── */
+    .workspace {
+      display: grid;
+      grid-template-columns: 240px 1fr 280px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── Panel ─────────────────────────────────────────────────────── */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-panel);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+
+    .panel-inner { padding: 20px; }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      margin-bottom: 3px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .count-badge {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--accent-pill);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Form elements ──────────────────────────────────────────────── */
+    .field { display: grid; gap: 5px; }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .field-input,
+    .field-select {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border: 1.5px solid var(--border-input);
+      border-radius: var(--radius-input);
+      background: #fff;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      appearance: none;
+    }
+
+    .field-input:focus,
+    .field-select:focus {
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 3px rgb(63 111 86 / .12);
+    }
+
+    .field-input::placeholder { color: var(--border-input); }
+
+    .field-input--amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      padding-left: 32px;
+    }
+
+    .amount-wrap { position: relative; }
+    .amount-prefix {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .select-wrap .field-select { padding-right: 32px; }
+
+    /* ── Buttons ────────────────────────────────────────────────────── */
+    .btn {
+      height: 44px;
+      padding: 0 18px;
+      border-radius: var(--radius-btn);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: var(--text-primary);
+    }
+
+    .btn-icon {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border-radius: 7px;
+      background: var(--secondary);
+      color: var(--text-muted);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .btn-icon:hover { background: var(--border); }
+
+    /* ── People panel ───────────────────────────────────────────────── */
+    .people-form { display: grid; gap: 10px; margin-bottom: 16px; }
+
+    .person-list { display: grid; gap: 6px; }
+
+    .person-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--radius-row);
+    }
+
+    .person-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-pill);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .person-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .person-actions { display: flex; gap: 4px; }
+
+    /* ── Expense panel ──────────────────────────────────────────────── */
+    .expense-form { display: grid; gap: 12px; margin-bottom: 16px; }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .split-hint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--accent-pill);
+      border-radius: 7px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .split-hint svg { flex-shrink: 0; }
+
+    .disclosure-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: none;
+      border: 1.5px dashed var(--border-dashed);
+      border-radius: 7px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-subtle);
+      cursor: pointer;
+      gap: 8px;
+    }
+
+    .disclosure-chevron {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+
+    .disclosure-trigger[aria-expanded="true"] .disclosure-chevron {
+      transform: rotate(180deg);
+    }
+
+    .expense-list { display: grid; gap: 8px; }
+
+    .expense-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--radius-row);
+    }
+
+    .expense-info { flex: 1; min-width: 0; }
+
+    .expense-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .expense-meta {
+      font-size: 12px;
+      color: var(--text-subtle);
+      margin-top: 2px;
+    }
+
+    .expense-amount {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .expense-actions { display: flex; gap: 4px; }
+
+    /* ── Settlement panel ───────────────────────────────────────────── */
+    .balance-list { display: grid; gap: 6px; margin-bottom: 20px; }
+
+    .balance-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--radius-row);
+      gap: 10px;
+    }
+
+    .balance-person { display: flex; align-items: center; gap: 9px; }
+
+    .balance-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .balance-amount {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .balance-amount.positive { color: var(--positive); }
+    .balance-amount.negative { color: var(--negative); }
+    .balance-amount.zero { color: var(--text-subtle); }
+
+    .balance-indicator {
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .settlement-heading {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 10px;
+    }
+
+    .settlement-list { display: grid; gap: 8px; }
+
+    /* ── Receipt card ───────────────────────────────────────────────── */
+    .receipt-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .receipt-head {
+      background: var(--accent);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .receipt-parties {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .receipt-arrow {
+      opacity: .7;
+    }
+
+    .receipt-amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .receipt-body {
+      padding: 12px 14px;
+      background: var(--bg-panel);
+    }
+
+    .receipt-explanation {
+      font-size: 12px;
+      color: var(--text-subtle);
+      line-height: 1.5;
+    }
+
+    .receipt-explanation strong { color: var(--text-muted); }
+
+    /* ── Settlement rows ────────────────────────────────────────────── */
+    .settlement-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--radius-row);
+      cursor: pointer;
+    }
+
+    .settlement-row:hover { border-color: var(--border-input); }
+
+    .settlement-row.active {
+      background: rgb(36 71 50 / .04);
+      border-color: var(--accent-soft);
+    }
+
+    .settlement-from,
+    .settlement-to {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .settlement-arrow { color: var(--text-subtle); flex-shrink: 0; }
+    .settlement-spacer { flex: 1; }
+
+    .settlement-sum {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* ── Empty state ────────────────────────────────────────────────── */
+    .empty-state {
+      padding: 20px;
+      border: 1.5px dashed var(--border-dashed);
+      border-radius: 9px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .empty-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .empty-body {
+      font-size: 12px;
+      color: var(--text-subtle);
+      line-height: 1.5;
+    }
+
+    /* ── Divider label ──────────────────────────────────────────────── */
+    .list-divider {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      padding: 8px 0 4px;
+    }
+
+    /* ── Screen label overlay ───────────────────────────────────────── */
+    .screen-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Screen description ─────────────────────────────────────────── */
+    .screen-desc {
+      font-size: 13px;
+      color: var(--text-subtle);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── Separators between demo sections ───────────────────────────── */
+    .demo-section {
+      padding: 48px 0 0;
+      border-top: 1px solid var(--border);
+    }
+    .demo-section:first-child { border-top: none; padding-top: 0; }
+
+    .demo-section-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    /* Dot separator */
+    .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .4; }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div>
+      <div class="brand-lockup">
+        <div class="brand-icon">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+            <path d="M3 12l9-9 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 21V9h6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="app-title">Travel Split</h1>
+      </div>
+      <p class="app-tagline">One screen · No accounts · Stays on your device</p>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;padding-top:6px;">
+      <button class="btn btn-secondary" style="height:36px;font-size:13px;">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>
+        Copy summary
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 1: Desktop workspace — active trip with data           -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="demo-section">
+    <div class="screen-label">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10" rx="2"/></svg>
+      Screen 1 — Desktop workspace (active trip)
+    </div>
+    <p class="screen-desc">
+      Three-column layout. <strong>People</strong> sets up the group (first, prerequisite). <strong>Expenses</strong> is widest — it's where most work happens. <strong>Settlement</strong> shows the outcome. All three visible at once; no navigation needed.
+    </p>
+
+    <div class="workspace">
+
+      <!-- ── PEOPLE PANEL ─────────────────────────────────────────── -->
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">People</div>
+              <div class="panel-title">Trip group</div>
+            </div>
+            <span class="count-badge">4</span>
+          </div>
+
+          <div class="people-form">
+            <div class="field">
+              <label class="field-label">Add someone</label>
+              <input class="field-input" type="text" placeholder="Name" value="">
+            </div>
+            <button class="btn btn-primary">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add to trip
+            </button>
+          </div>
+
+          <div class="person-list">
+            <div class="person-row">
+              <div class="person-avatar">A</div>
+              <span class="person-name">Alex</span>
+              <div class="person-actions">
+                <button class="btn-icon" title="Remove Alex" disabled style="opacity:.35;cursor:not-allowed;">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-avatar" style="background:#e8f0e4;">M</div>
+              <span class="person-name">Mina</span>
+              <div class="person-actions">
+                <button class="btn-icon" title="Remove Mina" disabled style="opacity:.35;cursor:not-allowed;">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-avatar" style="background:#f0ece4;">S</div>
+              <span class="person-name">Sam</span>
+              <div class="person-actions">
+                <button class="btn-icon" title="Remove Sam" disabled style="opacity:.35;cursor:not-allowed;">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-avatar" style="background:#ede8e0;">J</div>
+              <span class="person-name">Jo</span>
+              <div class="person-actions">
+                <button class="btn-icon" title="Remove Jo">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size:11px;color:var(--text-subtle);margin-top:10px;line-height:1.5;">
+            Grayed-out removes are blocked — that person appears in an expense.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── EXPENSE PANEL ────────────────────────────────────────── -->
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">Expenses</div>
+              <div class="panel-title">Activities &amp; costs</div>
+            </div>
+            <span class="count-badge">3</span>
+          </div>
+
+          <!-- Fast-path expense form (4 fields) -->
+          <div class="expense-form">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input class="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" value="">
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label class="field-label">Amount</label>
+                <div class="amount-wrap">
+                  <span class="amount-prefix">$</span>
+                  <input class="field-input field-input--amount" type="text" inputmode="decimal" placeholder="0.00">
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Paid by</label>
+                <div class="select-wrap">
+                  <select class="field-select">
+                    <option>Alex</option>
+                    <option>Mina</option>
+                    <option>Sam</option>
+                    <option>Jo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Split hint — shows state, no extra taps needed -->
+            <div class="split-hint">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Split equally across 4 people
+            </div>
+
+            <!-- Advanced split — collapsed by default -->
+            <button class="disclosure-trigger" aria-expanded="false">
+              <span>Customize split</span>
+              <svg class="disclosure-chevron" width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <button class="btn btn-primary">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Save expense
+            </button>
+          </div>
+
+          <!-- Expenses list -->
+          <div class="list-divider">Recent</div>
+          <div class="expense-list">
+            <div class="expense-row">
+              <div class="expense-info">
+                <div class="expense-title">Dinner</div>
+                <div class="expense-meta">Paid by Alex · 4 people</div>
+              </div>
+              <span class="expense-amount">$80.00</span>
+              <div class="expense-actions">
+                <button class="btn-icon" title="Edit Dinner">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="btn-icon" title="Delete Dinner" style="color:var(--negative);">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="expense-row">
+              <div class="expense-info">
+                <div class="expense-title">Boat tickets</div>
+                <div class="expense-meta">Paid by Sam · 3 people · custom weights</div>
+              </div>
+              <span class="expense-amount">$120.00</span>
+              <div class="expense-actions">
+                <button class="btn-icon" title="Edit Boat tickets">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="btn-icon" title="Delete Boat tickets" style="color:var(--negative);">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="expense-row">
+              <div class="expense-info">
+                <div class="expense-title">Hotel (2 nights)</div>
+                <div class="expense-meta">Paid by Mina · 4 people</div>
+              </div>
+              <span class="expense-amount">$340.00</span>
+              <div class="expense-actions">
+                <button class="btn-icon" title="Edit Hotel">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="btn-icon" title="Delete Hotel" style="color:var(--negative);">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SETTLEMENT PANEL ─────────────────────────────────────── -->
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">Settlement</div>
+              <div class="panel-title">Who pays whom</div>
+            </div>
+          </div>
+
+          <!-- Net balances -->
+          <div class="balance-list">
+            <div class="balance-row">
+              <div class="balance-person">
+                <div class="person-avatar" style="width:26px;height:26px;font-size:11px;">A</div>
+                <span class="balance-name">Alex</span>
+              </div>
+              <span class="balance-amount positive">
+                <span class="balance-indicator">▲</span>
+                +$28.00
+              </span>
+            </div>
+            <div class="balance-row">
+              <div class="balance-person">
+                <div class="person-avatar" style="width:26px;height:26px;font-size:11px;background:#e8f0e4;">M</div>
+                <span class="balance-name">Mina</span>
+              </div>
+              <span class="balance-amount positive">
+                <span class="balance-indicator">▲</span>
+                +$255.00
+              </span>
+            </div>
+            <div class="balance-row">
+              <div class="balance-person">
+                <div class="person-avatar" style="width:26px;height:26px;font-size:11px;background:#f0ece4;">S</div>
+                <span class="balance-name">Sam</span>
+              </div>
+              <span class="balance-amount negative">
+                <span class="balance-indicator">▼</span>
+                −$163.00
+              </span>
+            </div>
+            <div class="balance-row">
+              <div class="balance-person">
+                <div class="person-avatar" style="width:26px;height:26px;font-size:11px;background:#ede8e0;">J</div>
+                <span class="balance-name">Jo</span>
+              </div>
+              <span class="balance-amount negative">
+                <span class="balance-indicator">▼</span>
+                −$120.00
+              </span>
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="settlement-heading">Suggested payments</div>
+
+          <div class="settlement-list">
+
+            <!-- Selected/expanded receipt card -->
+            <div class="receipt-card">
+              <div class="receipt-head">
+                <div class="receipt-parties">
+                  <span>Sam</span>
+                  <span class="receipt-arrow">→</span>
+                  <span>Mina</span>
+                </div>
+                <span class="receipt-amount">$163.00</span>
+              </div>
+              <div class="receipt-body">
+                <p class="receipt-explanation">
+                  This clears <strong>Sam's −$163.00</strong> balance and reduces Mina's +$255.00 balance to <strong>+$92.00</strong>.
+                </p>
+              </div>
+            </div>
+
+            <!-- Collapsed row -->
+            <div class="settlement-row">
+              <span class="settlement-from">Jo</span>
+              <span class="settlement-arrow">→</span>
+              <span class="settlement-to">Mina</span>
+              <span class="settlement-spacer"></span>
+              <span class="settlement-sum">$92.00</span>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="color:var(--text-subtle)"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <div class="settlement-row">
+              <span class="settlement-from">Jo</span>
+              <span class="settlement-arrow">→</span>
+              <span class="settlement-to">Alex</span>
+              <span class="settlement-spacer"></span>
+              <span class="settlement-sum">$28.00</span>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="color:var(--text-subtle)"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+          </div>
+
+          <p style="font-size:11px;color:var(--text-subtle);margin-top:14px;line-height:1.5;">
+            Tap a payment to see the receipt explanation. All amounts precise to the cent.
+          </p>
+
+        </div>
+      </div>
+
+    </div><!-- /workspace -->
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 2: Desktop workspace — empty state (first launch)      -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="demo-section">
+    <div class="screen-label">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10" rx="2"/></svg>
+      Screen 2 — Empty state (first launch)
+    </div>
+    <p class="screen-desc">
+      App opens directly into the workspace. No wizard, no onboarding modal. The <strong>People</strong> panel's add-name input is the natural first interaction point. Expenses panel is visually available but fields are disabled until at least one person exists.
+    </p>
+
+    <div class="workspace">
+
+      <!-- People — empty -->
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">People</div>
+              <div class="panel-title">Trip group</div>
+            </div>
+            <span class="count-badge">0</span>
+          </div>
+
+          <div class="people-form">
+            <div class="field">
+              <label class="field-label">Add someone</label>
+              <input class="field-input" type="text" placeholder="Name" autofocus style="border-color:var(--accent-soft);box-shadow:0 0 0 3px rgb(63 111 86 / .12);">
+            </div>
+            <button class="btn btn-primary">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add to trip
+            </button>
+          </div>
+
+          <div class="empty-state">
+            <div class="empty-icon">🧳</div>
+            <div class="empty-title">No one added yet</div>
+            <div class="empty-body">Type a name above to add the first traveler. Everyone in the group should be added before recording expenses.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Expenses — disabled until people exist -->
+      <div class="panel" style="opacity:.5;pointer-events:none;">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">Expenses</div>
+              <div class="panel-title">Activities &amp; costs</div>
+            </div>
+            <span class="count-badge">0</span>
+          </div>
+          <div class="expense-form">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input class="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" disabled>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label class="field-label">Amount</label>
+                <div class="amount-wrap">
+                  <span class="amount-prefix">$</span>
+                  <input class="field-input field-input--amount" type="text" placeholder="0.00" disabled>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Paid by</label>
+                <div class="select-wrap">
+                  <select class="field-select" disabled></select>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" disabled style="opacity:.45;cursor:not-allowed;">Save expense</button>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">🧾</div>
+            <div class="empty-title">Add people first</div>
+            <div class="empty-body">Once you've added your travel group, record expenses here.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settlement — empty -->
+      <div class="panel" style="opacity:.5;pointer-events:none;">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">Settlement</div>
+              <div class="panel-title">Who pays whom</div>
+            </div>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">⚖️</div>
+            <div class="empty-title">Nothing to settle</div>
+            <div class="empty-body">Add friends and record expenses to see balances and suggested payments.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 3: Advanced split — "Customize split" expanded         -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="demo-section">
+    <div class="screen-label">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10" rx="2"/></svg>
+      Screen 3 — Customize split (advanced sub-flow, expanded)
+    </div>
+    <p class="screen-desc">
+      Tapping "Customize split" reveals participant checkboxes and weight inputs. Sub-flow only — the default (equal across all) requires zero interaction. Helper text always shows the current state so organizer can confirm before saving.
+    </p>
+
+    <div class="workspace">
+      <div></div><!-- spacer for people col -->
+
+      <!-- Expense form with advanced split open -->
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <div class="section-eyebrow">Expenses</div>
+              <div class="panel-title">Activities &amp; costs</div>
+            </div>
+            <span class="count-badge">3</span>
+          </div>
+
+          <div class="expense-form">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input class="field-input" type="text" value="Boat tickets">
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label class="field-label">Amount</label>
+                <div class="amount-wrap">
+                  <span class="amount-prefix">$</span>
+                  <input class="field-input field-input--amount" type="text" value="120.00">
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Paid by</label>
+                <div class="select-wrap">
+                  <select class="field-select">
+                    <option>Alex</option>
+                    <option selected>Sam</option>
+                    <option>Mina</option>
+                    <option>Jo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Disclosure — expanded -->
+            <button class="disclosure-trigger" aria-expanded="true" style="background:var(--accent-pill);border-color:var(--accent-soft);border-style:solid;color:var(--accent);">
+              <span style="font-weight:600;">Customize split</span>
+              <svg class="disclosure-chevron" style="transform:rotate(180deg)" width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <!-- Participant rows (expanded) -->
+            <div style="border:1.5px solid var(--accent-pill);border-radius:9px;overflow:hidden;background:var(--bg-row);">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border-row);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;cursor:pointer;flex:1;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--accent);">
+                  <div class="person-avatar" style="width:24px;height:24px;font-size:11px;">A</div>
+                  Alex
+                </label>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:11px;color:var(--text-subtle);">Weight</span>
+                  <input type="number" value="2" min="0.25" step="0.25" style="width:56px;height:34px;border:1.5px solid var(--border-input);border-radius:6px;text-align:center;font-family:var(--font-mono);font-size:14px;background:#fff;">
+                </div>
+              </div>
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border-row);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;cursor:pointer;flex:1;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--accent);">
+                  <div class="person-avatar" style="width:24px;height:24px;font-size:11px;background:#e8f0e4;">M</div>
+                  Mina
+                </label>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:11px;color:var(--text-subtle);">Weight</span>
+                  <input type="number" value="1" min="0.25" step="0.25" style="width:56px;height:34px;border:1.5px solid var(--border-input);border-radius:6px;text-align:center;font-family:var(--font-mono);font-size:14px;background:#fff;">
+                </div>
+              </div>
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border-row);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;cursor:pointer;flex:1;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--accent);">
+                  <div class="person-avatar" style="width:24px;height:24px;font-size:11px;background:#f0ece4;">S</div>
+                  Sam
+                </label>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:11px;color:var(--text-subtle);">Weight</span>
+                  <input type="number" value="1" min="0.25" step="0.25" style="width:56px;height:34px;border:1.5px solid var(--border-input);border-radius:6px;text-align:center;font-family:var(--font-mono);font-size:14px;background:#fff;">
+                </div>
+              </div>
+              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;opacity:.4;">
+                <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;cursor:pointer;flex:1;">
+                  <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);">
+                  <div class="person-avatar" style="width:24px;height:24px;font-size:11px;background:#ede8e0;">J</div>
+                  Jo
+                </label>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:11px;color:var(--text-subtle);">Weight</span>
+                  <input type="number" value="1" min="0.25" step="0.25" disabled style="width:56px;height:34px;border:1.5px solid var(--border-row);border-radius:6px;text-align:center;font-family:var(--font-mono);font-size:14px;background:var(--bg-row);">
+                </div>
+              </div>
+              <!-- Split summary inside the disclosure -->
+              <div style="padding:10px 14px;background:var(--accent-pill);border-top:1px solid var(--border-row);font-size:12px;color:var(--accent);font-weight:500;display:flex;align-items:center;gap:6px;">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Custom weighted split · Alex ×2, Mina ×1, Sam ×1 → total weight 4
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-primary" style="flex:1;">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Save expense
+              </button>
+              <button class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div></div><!-- spacer for settlement col -->
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+</body>
+</html>

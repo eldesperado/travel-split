@@ -1,0 +1,139 @@
+{
+  "reviewChoiceGroups": [
+    {
+      "id": "architecture",
+      "title": "Architecture disposition",
+      "prompt": "Choose how to handle the architecture findings for Travel Split's local data plan.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "reduced-snapshot-repository",
+          "label": "Use reduced snapshot repository",
+          "description": "Proceed with current tabs, TripDataProvider, pure reducer/domain modules, and a snapshot-in-IndexedDB TripRepository.",
+          "recommended": true,
+          "rationale": "This satisfies local DB and SQLite-later goals while avoiding premature normalized IndexedDB complexity."
+        },
+        {
+          "id": "full-normalized-indexeddb",
+          "label": "Keep normalized IndexedDB",
+          "description": "Implement trips, people, expenses, metadata stores and tripId queries in the first pass.",
+          "rationale": "Use this only if multiple-trip or SQLite-style schema rehearsal is more important than a smaller first green path."
+        },
+        {
+          "id": "return-localstorage-contract",
+          "label": "Return to original localStorage contract",
+          "description": "Ignore the latest IndexedDB preference and implement the original localStorage adapter.",
+          "rationale": "This is smallest relative to the original docs, but conflicts with the user's new local database decision."
+        }
+      ]
+    },
+    {
+      "id": "code_quality",
+      "title": "Code quality stance",
+      "prompt": "Choose the implementation discipline for domain, provider, and screen wiring.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "clean-domain-boundaries",
+          "label": "Clean domain boundaries",
+          "description": "Add domain types, parsers, reducer, selectors, logger, repository, and keep screens presentation-oriented.",
+          "recommended": true,
+          "rationale": "The review found mock DTOs and inline form state cannot safely support real split math."
+        },
+        {
+          "id": "provider-heavy-fast-path",
+          "label": "Provider-heavy fast path",
+          "description": "Put most parsing, selectors, persistence, and logging directly in TripDataProvider for speed, refactor later.",
+          "rationale": "Fastest implementation, but likely creates a God module and weaker unit-test boundaries."
+        },
+        {
+          "id": "screen-inline-logic",
+          "label": "Inline screen logic",
+          "description": "Wire commands and validation directly inside PeopleScreen, ExpensesScreen, and SettleScreen.",
+          "rationale": "Lowest indirection, but contradicts the reviewed requirement to keep calculation rules outside React components."
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "title": "Validation requirement",
+      "prompt": "Choose the validation gate required before accepting implementation.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "full-reduced-verify-gate",
+          "label": "Full reduced verify gate",
+          "description": "Require Vitest coverage at 80%, repository tests with fake IndexedDB, build, and one Playwright screenshot smoke test.",
+          "recommended": true,
+          "rationale": "This directly covers money math, reducer behavior, persistence, and runtime wiring without a broad e2e suite."
+        },
+        {
+          "id": "unit-build-only",
+          "label": "Unit + build only",
+          "description": "Run Vitest coverage and production build, but skip browser screenshot automation.",
+          "rationale": "Simpler bootstrap, but fails the selected runtime/browser validation requirement."
+        },
+        {
+          "id": "manual-browser-proof",
+          "label": "Manual browser proof",
+          "description": "Run unit/build automatically and validate UI manually with a screenshot.",
+          "rationale": "Lower dependency load, but not repeatable and weaker at catching mock-data wiring regressions."
+        }
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "Performance and risk response",
+      "prompt": "Choose how implementation should handle local DB failure, logs, and privacy risk.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "visible-errors-redacted-logs",
+          "label": "Visible errors + redacted logs",
+          "description": "Add provider load/save error states, command-scoped saves, safe structured console logs, and synthetic screenshot data.",
+          "recommended": true,
+          "rationale": "This closes the two critical gaps: silent save failure and clipboard failure, while keeping logs console-only."
+        },
+        {
+          "id": "console-only-errors",
+          "label": "Console-only failures",
+          "description": "Log IndexedDB and clipboard errors to console but keep UI fallback minimal.",
+          "rationale": "Easier to implement, but creates silent user-facing data loss risk."
+        },
+        {
+          "id": "persistent-audit-log",
+          "label": "Persistent audit log",
+          "description": "Store local event logs alongside trip data for debugging.",
+          "rationale": "Useful later, but explicitly outside the selected console-only logging scope and adds privacy/storage complexity."
+        }
+      ]
+    },
+    {
+      "id": "final_disposition",
+      "title": "Final disposition",
+      "prompt": "Choose the final implementation decision for this exit review.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "approve-reduced-scope",
+          "label": "Approve reduced scope",
+          "description": "Implement the snapshot IndexedDB repository plan with the must-do guardrails before coding.",
+          "recommended": true,
+          "rationale": "The plan is implementation-ready after reducing storage complexity and reconciling stale docs."
+        },
+        {
+          "id": "request-plan-addendum-first",
+          "label": "Request plan addendum first",
+          "description": "Do not implement until the contract file is updated to remove localStorage/workspace contradictions.",
+          "rationale": "Useful if stale documentation is likely to mislead the implementation pass."
+        },
+        {
+          "id": "reject-for-redesign",
+          "label": "Reject for redesign",
+          "description": "Stop and redesign around normalized IndexedDB or SQLite before any UI wiring.",
+          "rationale": "Use only if the local DB schema is considered the primary product risk."
+        }
+      ]
+    }
+  ]
+}
