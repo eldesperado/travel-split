@@ -1,0 +1,139 @@
+{
+  "reviewChoiceGroups": [
+    {
+      "id": "architecture",
+      "title": "Architecture disposition",
+      "prompt": "Choose how to handle platform-based mobile/desktop shell selection.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "single-branch-platform-detector",
+          "label": "Single branch + platform detector",
+          "description": "Render exactly one shell from App.tsx using a small isMobileBrowserPlatform detector.",
+          "recommended": true,
+          "rationale": "Matches the user requirement while avoiding duplicate DOM, duplicate labels, and CSS breakpoint drift."
+        },
+        {
+          "id": "responsive-css-selector",
+          "label": "Responsive CSS selector",
+          "description": "Use viewport breakpoints to choose mobile vs desktop shell.",
+          "rationale": "Best general UX, but conflicts with the explicit platform-based requirement."
+        },
+        {
+          "id": "layout-service-toggle",
+          "label": "Layout service + user toggle",
+          "description": "Add a layout service and persisted manual override now.",
+          "rationale": "Useful later for iPad ambiguity, but overbuilt for the smallest safe version."
+        }
+      ]
+    },
+    {
+      "id": "code_quality",
+      "title": "Code quality stance",
+      "prompt": "Choose how much code structure this focused layout decision needs.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "pure-detector-small-hook",
+          "label": "Pure detector + small hook",
+          "description": "Keep isMobileBrowserPlatform pure and usePlatformLayout as a thin hook wrapper.",
+          "recommended": true,
+          "rationale": "This is the easiest path to unit-test without creating a layout service."
+        },
+        {
+          "id": "component-test-only",
+          "label": "Component tests only",
+          "description": "Hide detector details inside React and test App rendering only.",
+          "rationale": "Less exported API, but harder to cover UA edge cases cleanly."
+        },
+        {
+          "id": "split-shell-files-now",
+          "label": "Split shell files now",
+          "description": "Extract MobileShell and DesktopShell files immediately.",
+          "rationale": "Reasonable if App.tsx grows, but not necessary for this reduced scope."
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "title": "Runtime validation requirement",
+      "prompt": "Choose the minimum runtime UI test matrix before accepting the change.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "platform-viewport-matrix",
+          "label": "Platform + viewport matrix",
+          "description": "Test desktop-wide, desktop-narrow, mobile-phone, and mobile-wide shell selection; run full flow on one mobile and one desktop scenario.",
+          "recommended": true,
+          "rationale": "This directly proves platform selection is not accidentally viewport selection while keeping runtime cost manageable."
+        },
+        {
+          "id": "two-flow-tests-only",
+          "label": "Two flow tests only",
+          "description": "Run one desktop and one mobile core flow without narrow/wide cross-checks.",
+          "rationale": "Faster, but it will not catch viewport-based regression."
+        },
+        {
+          "id": "unit-only-detector-tests",
+          "label": "Unit-only detector tests",
+          "description": "Rely on unit tests for platform detection and skip browser matrix changes.",
+          "rationale": "Insufficient because the user specifically prefers runtime UI testing across scenarios."
+        }
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "Performance and risk response",
+      "prompt": "Choose how to manage UA ambiguity and runtime artifact risk.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "document-caveats-synthetic-artifacts",
+          "label": "Document caveats + synthetic artifacts",
+          "description": "Document UA/iPad caveats, keep platform detection layout-only, reset test storage, and use synthetic screenshots.",
+          "recommended": true,
+          "rationale": "Accepts known UA imperfection without adding product complexity or privacy risk."
+        },
+        {
+          "id": "add-layout-override-now",
+          "label": "Add override now",
+          "description": "Add a local setting to force mobile or desktop layout.",
+          "rationale": "Reduces misclassification risk but introduces new UI, persistence, and test work."
+        },
+        {
+          "id": "ignore-ua-caveats",
+          "label": "Ignore caveats",
+          "description": "Ship platform detection with no documented limitations or special tests.",
+          "rationale": "Fastest, but brittle and likely to regress on iPad/tablet scenarios."
+        }
+      ]
+    },
+    {
+      "id": "final_disposition",
+      "title": "Final disposition",
+      "prompt": "Choose the final implementation readiness decision for platform layout selection.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "approve-reduced-with-test-guardrails",
+          "label": "Approve reduced scope with test guardrails",
+          "description": "Proceed with one detector and one rendered shell, after adding the runtime matrix guardrails.",
+          "recommended": true,
+          "rationale": "The architecture is small enough; the main missing piece is valid platform-based runtime coverage."
+        },
+        {
+          "id": "request-runtime-matrix-first",
+          "label": "Request runtime matrix first",
+          "description": "Do not accept implementation until Playwright projects prove platform vs viewport behavior.",
+          "rationale": "Choose this if test correctness is considered blocking before any further code review."
+        },
+        {
+          "id": "reject-platform-detection",
+          "label": "Reject platform detection",
+          "description": "Redesign around responsive layout rather than browser platform.",
+          "rationale": "Best general UX, but contradicts the selected product requirement."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "reviewChoiceGroups": [
+    {
+      "id": "architecture",
+      "title": "Architecture disposition",
+      "prompt": "Choose how to handle the platform shell architecture findings.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "single-branch-no-css-selection",
+          "label": "Single branch, no CSS shell selection",
+          "description": "Proceed with React deciding one mounted shell and remove CSS breakpoint rules that hide the selected shell.",
+          "recommended": true,
+          "rationale": "This matches the platform-not-viewport requirement and fixes the desktop-narrow blank UI risk."
+        },
+        {
+          "id": "css-breakpoint-selection",
+          "label": "CSS breakpoint selection",
+          "description": "Let media queries continue to choose or hide mobile/desktop shells.",
+          "rationale": "This is responsive-design friendly but directly contradicts the selected platform rule."
+        },
+        {
+          "id": "layout-service-redesign",
+          "label": "Layout service redesign",
+          "description": "Stop and build a broader layout service with override/tablet logic.",
+          "rationale": "Use only if the team wants to expand scope beyond the current platform-detector plan."
+        }
+      ]
+    },
+    {
+      "id": "code_quality",
+      "title": "Code quality stance",
+      "prompt": "Choose the code organization standard for the layout change.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "pure-detector-local-shells",
+          "label": "Pure detector + local shells",
+          "description": "Keep isMobileBrowserPlatform pure, keep shell functions local in App until they grow, and keep shared screens shared.",
+          "recommended": true,
+          "rationale": "This gives strong testability without over-extracting a small one-bit decision."
+        },
+        {
+          "id": "extract-shells-now",
+          "label": "Extract shells now",
+          "description": "Create separate MobileShell and DesktopShell files immediately.",
+          "rationale": "Reasonable if App.tsx grows, but not necessary for this implementation pass."
+        },
+        {
+          "id": "inline-platform-in-app",
+          "label": "Inline platform in App",
+          "description": "Remove the detector module and check navigator directly inside App.tsx.",
+          "rationale": "Smallest code footprint, but much worse unit-testability and future maintainability."
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "title": "Validation requirement",
+      "prompt": "Choose the runtime UI validation gate before accepting this plan.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "matrix-plus-two-flows",
+          "label": "Matrix + two full flows",
+          "description": "Add desktop-wide, desktop-narrow, mobile-phone, and mobile-wide shell tests, plus full mobile and desktop user flows with screenshots.",
+          "recommended": true,
+          "rationale": "This directly proves platform-versus-viewport behavior while keeping runtime cost controlled."
+        },
+        {
+          "id": "two-flows-only",
+          "label": "Two flows only",
+          "description": "Keep one mobile and one desktop flow without cross-checking narrow/wide platform behavior.",
+          "rationale": "Faster, but misses the exact regression risk found in the review: CSS breakpoint shell selection."
+        },
+        {
+          "id": "unit-tests-only",
+          "label": "Unit tests only",
+          "description": "Rely on detector unit tests and skip expanded Playwright runtime coverage.",
+          "rationale": "Insufficient because shell visibility and CSS can still violate the detector contract at runtime."
+        }
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "Performance and risk response",
+      "prompt": "Choose how to address platform ambiguity, CSS risk, and test artifacts.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "document-ui-only-reset-db",
+          "label": "Document UI-only + reset DB",
+          "description": "Document detector caveats, keep it UI-only, reset IndexedDB per scenario, and use synthetic screenshots.",
+          "recommended": true,
+          "rationale": "This handles known UA and local-data risks without adding product scope."
+        },
+        {
+          "id": "add-layout-override-now",
+          "label": "Add layout override now",
+          "description": "Add a user-facing/persisted switch to force mobile or desktop.",
+          "rationale": "Mitigates UA ambiguity, but introduces new UI, state, persistence, and tests."
+        },
+        {
+          "id": "accept-untested-ambiguity",
+          "label": "Accept untested ambiguity",
+          "description": "Ship platform detection with no matrix and no CSS shell-selection cleanup.",
+          "rationale": "Fastest path, but leaves the current critical desktop-narrow failure mode open."
+        }
+      ]
+    },
+    {
+      "id": "final_disposition",
+      "title": "Final disposition",
+      "prompt": "Choose the final disposition for the revised platform-layout plan.",
+      "mode": "single",
+      "options": [
+        {
+          "id": "approve-with-guardrails",
+          "label": "Approve with guardrails",
+          "description": "Implement the plan after removing CSS shell selection and adding the platform/viewport Playwright matrix.",
+          "recommended": true,
+          "rationale": "The plan is sound, but current nearby CSS and E2E coverage are not yet aligned with it."
+        },
+        {
+          "id": "request-changes-first",
+          "label": "Request changes first",
+          "description": "Revise the plan to explicitly call out CSS cleanup, test projects, and IndexedDB reset helpers before coding.",
+          "rationale": "Choose this if the written plan must be fully precise before implementation continues."
+        },
+        {
+          "id": "reject-platform-rule",
+          "label": "Reject platform rule",
+          "description": "Reject platform detection and redesign around responsive viewport-based layout.",
+          "rationale": "Better general UX, but conflicts with the explicit selected requirement."
+        }
+      ]
+    }
+  ]
+}
