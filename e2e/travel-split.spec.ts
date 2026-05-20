@@ -98,6 +98,40 @@ test('mobile-width flow persists and settles', async ({ page }, testInfo) => {
   await page.screenshot({ path: 'artifacts/runtime-validation.png', fullPage: true });
 });
 
+test('custom weighted split points missing amount back to amount field and then saves', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-phone', 'Custom split regression runs on the mobile-phone scenario only.');
+  await resetTravelSplitDb(page);
+  const mobile = page.locator('[data-layout="mobile"]');
+  await expect(mobile).toBeVisible();
+
+  await mobile.getByRole('tab', { name: 'People' }).click();
+  for (const name of ['Iana', 'John', 'Jake']) {
+    await mobile.getByLabel('Add someone').fill(name);
+    await mobile.getByRole('button', { name: 'Add to trip' }).click();
+    await expect(mobile.getByText(name).first()).toBeVisible();
+  }
+
+  await mobile.getByRole('tab', { name: 'Expenses' }).click();
+  await mobile.getByLabel('Title').fill('Hotel');
+  await mobile.getByLabel('Paid by').selectOption({ label: 'Jake' });
+  await mobile.getByRole('button', { name: 'Customize split' }).click();
+  await mobile.locator('input[type="number"]').nth(1).fill('0.5');
+  await mobile.getByRole('button', { name: 'Save expense' }).click();
+
+  const amountInput = mobile.getByLabel('Amount');
+  await expect(mobile.getByText('Enter an amount.')).toBeVisible();
+  await expect(amountInput).toBeFocused();
+
+  await amountInput.fill('300');
+  await mobile.getByRole('button', { name: 'Save expense' }).click();
+  await expect(mobile.getByText('Hotel')).toBeVisible();
+  await expect(mobile.getByText('weighted')).toBeVisible();
+
+  await mobile.getByRole('tab', { name: 'Settle' }).click();
+  await expect(mobile.getByText('Jake').first()).toBeVisible();
+  await expect(mobile.getByText('$120.00').first()).toBeVisible();
+});
+
 test('desktop-width workspace flow shows all panels at once', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-wide', 'Full desktop-width flow runs on the desktop-wide scenario only.');
   await resetTravelSplitDb(page);

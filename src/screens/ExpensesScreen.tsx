@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTripData } from '../data/TripDataProvider';
-import { formatCentsAbs } from '../domain/money';
+import { formatCentsAbs, parseAmountToCents } from '../domain/money';
 import type { Expense, ExpenseParticipant } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
 
@@ -10,6 +10,7 @@ export function ExpensesScreen() {
   const payerId = useId();
   const weightPrefix = useId();
   const { trip, upsertExpense, deleteExpense, error, warning, clearMessage } = useTripData();
+  const amountInputRef = useRef<HTMLInputElement>(null);
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -36,14 +37,23 @@ export function ExpensesScreen() {
   }, [customizeOpen, included, trip.people, weights]);
 
   async function saveExpense() {
+    const amountInvalidBeforeSave = !parseAmountToCents(amount).ok;
     const saved = await upsertExpense({ title, amount, payerId: paidBy, participants: selectedParticipants });
     if (saved) {
       setTitle('');
       setAmount('');
       setCustomizeOpen(false);
+      return;
+    }
+
+    if (amountInvalidBeforeSave) {
+      amountInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      amountInputRef.current?.focus({ preventScroll: true });
     }
   }
 
+  const amountErrorMessages = ['Enter an amount.', 'Use dollars and cents, like 40 or 40.50.', 'Amount must be greater than zero.', 'Amount is too large.'];
+  const amountHasError = error ? amountErrorMessages.includes(error) : false;
   const selectedSummary = customizeOpen
     ? `${selectedParticipants.length} selected · total weight ${selectedParticipants.reduce((sum, participant) => sum + participant.weight, 0)}`
     : `Split equally across ${trip.people.length} people`;
@@ -79,7 +89,7 @@ export function ExpensesScreen() {
                 <label className="field-label" htmlFor={amountId}>Amount</label>
                 <div className="amount-wrap">
                   <span className="amount-prefix">$</span>
-                  <input id={amountId} className="field-input" type="text" inputMode="decimal" placeholder="0.00" value={amount} onChange={(event) => setAmount(event.target.value)} />
+                  <input id={amountId} ref={amountInputRef} className="field-input" type="text" inputMode="decimal" placeholder="e.g. 120.00" value={amount} onChange={(event) => setAmount(event.target.value)} aria-invalid={amountHasError ? 'true' : undefined} />
                 </div>
               </div>
 
