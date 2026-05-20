@@ -39,7 +39,8 @@ test('shell selection follows viewport width', async ({ page }) => {
     expect(activeSurfaceBox).not.toBeNull();
     expect(tabBarBox!.x).toBeGreaterThanOrEqual(shellBox!.x - 1);
     expect(tabBarBox!.x + tabBarBox!.width).toBeLessThanOrEqual(shellBox!.x + shellBox!.width + 1);
-    expect(activeSurfaceBox!.width).toBeLessThanOrEqual(64);
+    expect(activeSurfaceBox!.width).toBeLessThanOrEqual(96);
+    expect(activeSurfaceBox!.height).toBeGreaterThanOrEqual(44);
   } else {
     await expect(page.locator('[data-layout="desktop"]')).toBeVisible();
     await expect(page.locator('[data-layout="mobile"]')).toHaveCount(0);

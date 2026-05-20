@@ -56,19 +56,21 @@ export function TabBar({ active, onSelect, expenseCount }: TabBarProps) {
             className={`tab-item ${isActive ? 'is-active' : ''}`}
             onClick={() => onSelect(tab.id)}
           >
-            <span className="tab-icon-surface" data-active-surface={isActive ? 'true' : undefined}>
-              <span className="tab-icon">{tab.icon}</span>
-              {showBadge && (
-                <span
-                  key={expenseCount}
-                  className="badge-pulse absolute -top-0.5 -right-1.5 min-w-[16px] h-4 bg-negative text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
-                  aria-label={`${expenseCount} expenses`}
-                >
-                  {expenseCount}
-                </span>
-              )}
+            <span className="tab-selection-surface" data-active-surface={isActive ? 'true' : undefined}>
+              <span className="tab-icon-surface">
+                <span className="tab-icon">{tab.icon}</span>
+                {showBadge && (
+                  <span
+                    key={expenseCount}
+                    className="badge-pulse absolute -top-0.5 -right-1.5 min-w-[16px] h-4 bg-negative text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+                    aria-label={`${expenseCount} expenses`}
+                  >
+                    {expenseCount}
+                  </span>
+                )}
+              </span>
+              <span className="tab-label">{tab.label}</span>
             </span>
-            <span className="tab-label">{tab.label}</span>
           </button>
         );
       })}

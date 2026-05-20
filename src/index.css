@@ -273,22 +273,34 @@
   }
 
   .tab-item {
-    @apply flex-1 flex flex-col items-center justify-start gap-[2px] border-none bg-transparent cursor-pointer text-ios-gray;
+    @apply flex-1 flex items-start justify-center border-none bg-transparent cursor-pointer text-ios-gray;
     min-width: 0;
     min-height: 44px;
     padding: 0 2px;
   }
 
+  .tab-selection-surface {
+    min-width: 58px;
+    max-width: min(92px, 88%);
+    min-height: 44px;
+    padding: 4px 12px 5px;
+    border-radius: 18px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    color: #8E8E93;
+    transition: background-color .18s var(--ease-micro), color .18s var(--ease-micro), transform .12s var(--ease-micro);
+  }
+
   .tab-icon-surface {
-    width: min(64px, 72%);
-    height: 30px;
-    border-radius: 999px;
+    width: 24px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    color: #8E8E93;
-    transition: background-color .18s var(--ease-micro), color .18s var(--ease-micro), transform .12s var(--ease-micro);
   }
 
   .tab-icon {
@@ -303,8 +315,8 @@
   }
 
   .tab-item.is-active { color: #244732; }
-  .tab-item.is-active .tab-icon-surface { background: #e1eadf; color: #244732; }
-  .tab-item:active .tab-icon-surface { transform: scale(.96); }
+  .tab-item.is-active .tab-selection-surface { background: #e1eadf; color: #244732; }
+  .tab-item:active .tab-selection-surface { transform: scale(.96); }
 
   /* ── Panel card ── */
   .panel {
