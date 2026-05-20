@@ -544,6 +544,14 @@
     @apply border-[1.5px] border-dashed border-border-dashed rounded-[10px] px-4 py-4 text-center mt-3;
   }
 
+  .empty-state-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+    color: #3f6f56;
+    opacity: 0.5;
+  }
+
   /* ── Amount input prefix ── */
   .amount-wrap { @apply relative; }
   .amount-prefix {

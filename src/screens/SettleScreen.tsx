@@ -38,7 +38,12 @@ export function SettleScreen() {
 
           {selectors.balances.length === 0 && animatedBalances.length === 0 ? (
             <div className="empty-state">
-              <p className="text-3xl mb-2">✅</p>
+              <div className="empty-state-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 12l3 3 5-6" />
+                </svg>
+              </div>
               <p className="text-sm font-semibold text-ink-muted mb-1">Nothing to settle yet</p>
               <p className="text-xs text-ink-subtle leading-relaxed">Add people and expenses to see balances.</p>
             </div>

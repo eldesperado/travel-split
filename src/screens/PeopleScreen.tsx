@@ -59,7 +59,13 @@ export function PeopleScreen() {
 
           {trip.people.length === 0 && (
             <div className="empty-state">
-              <p className="text-3xl mb-2">🧳</p>
+              <div className="empty-state-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <rect x="4" y="6" width="16" height="14" rx="2" />
+                  <path d="M10 10v6M14 10v6" />
+                </svg>
+              </div>
               <p className="text-sm font-semibold text-ink-muted mb-1">No one added yet</p>
               <p className="text-xs text-ink-subtle leading-relaxed">Type a name above to add the first traveler. Add everyone before recording expenses.</p>
             </div>
