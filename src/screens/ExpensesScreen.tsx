@@ -24,6 +24,7 @@ export function ExpensesScreen() {
   const [included, setIncluded] = useState<Record<string, boolean>>({});
   const [weights, setWeights] = useState<Record<string, string>>({});
   const saveButtonRef = useRef<HTMLButtonElement>(null);
+  const skipNextSaveScrollRef = useRef(false);
   const animatedExpenses = useAnimatedCollection(
     trip.expenses,
     useCallback((expense: Expense) => expense.id, []),
@@ -86,6 +87,7 @@ export function ExpensesScreen() {
     setAmount((expense.amountCents / 100).toFixed(2));
     setPaidBy(expense.payerId);
     const weighted = expense.participants.some((p) => p.weight !== 1);
+    if (weighted && !customizeOpen) skipNextSaveScrollRef.current = true;
     setCustomizeOpen(weighted);
     const participantMap = new Map(expense.participants.map((p) => [p.personId, p.weight]));
     setIncluded(Object.fromEntries(trip.people.map((p) => [p.id, participantMap.has(p.id)])));
@@ -107,11 +109,24 @@ export function ExpensesScreen() {
 
   useEffect(() => {
     if (!customizeOpen) return;
+    if (skipNextSaveScrollRef.current) {
+      skipNextSaveScrollRef.current = false;
+      return;
+    }
     const id = window.setTimeout(() => {
       saveButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 320);
     return () => window.clearTimeout(id);
   }, [customizeOpen]);
+
+  useEffect(() => {
+    if (editingId && !trip.expenses.some((expense) => expense.id === editingId)) {
+      setEditingId(null);
+      setTitle('');
+      setAmount('');
+      setCustomizeOpen(false);
+    }
+  }, [editingId, trip.expenses]);
 
   const amountHasError = isAmountErrorMessage(error);
   const selectedWeightTotal = selectedParticipants.reduce((sum, participant) => {
