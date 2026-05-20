@@ -217,7 +217,7 @@ export function ExpensesScreen() {
 
               <button className="disclosure-trigger" type="button" aria-expanded={customizeOpen} onClick={() => setCustomizeOpen((value) => !value)} style={customizeOpen ? { background: '#e1eadf', borderColor: '#3f6f56', borderStyle: 'solid', color: '#244732' } : undefined}>
                 <span className={customizeOpen ? 'font-semibold' : ''}>Customize split</span>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: customizeOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s', flexShrink: 0 }}>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: customizeOpen ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
                   <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
@@ -265,11 +265,11 @@ export function ExpensesScreen() {
           <p className="section-label">Recent</p>
 
           {trip.expenses.length === 0 && animatedExpenses.length === 0 ? (
-            <p className="text-xs text-ink-subtle">No expenses yet.</p>
+            <p className="text-xs text-ink-subtle">Expenses will appear here.</p>
           ) : (
             <>
               <div className="motion-list" aria-live="polite">
-              {animatedExpenses.map(({ item: expense, key, phase }) => {
+                {animatedExpenses.map(({ item: expense, key, phase }) => {
                 const payer = trip.people.find((person) => person.id === expense.payerId);
                 const weighted = expense.participants.some((participant) => participant.weight !== 1);
                 return (
@@ -294,7 +294,7 @@ export function ExpensesScreen() {
                     </button>
                   </div>
                 );
-              })}
+                })}
               </div>
               {nextStepAction && !editingId && (
                 <div className="next-step-card">
@@ -326,7 +326,7 @@ function ExpensesEmptyContent() {
         </svg>
       </div>
       <p className="text-sm font-semibold text-ink-muted mb-1">Add people first</p>
-      <p className="text-xs text-ink-subtle leading-relaxed">Expenses need a payer and split participants before they can be saved.</p>
+      <p className="text-xs text-ink-subtle leading-relaxed">Add travelers before recording shared costs.</p>
     </>
   );
 }

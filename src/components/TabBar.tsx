@@ -62,7 +62,7 @@ export function TabBar({ active, onSelect, expenseCount }: TabBarProps) {
                 {showBadge && (
                   <span
                     key={expenseCount}
-                    className="badge-pulse absolute -top-0.5 -right-1.5 min-w-[16px] h-4 bg-negative text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+                    className="absolute -top-0.5 -right-1.5 min-w-[16px] h-4 bg-negative text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
                     aria-label={`${expenseCount} expenses`}
                   >
                     {expenseCount}

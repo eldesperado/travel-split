@@ -78,7 +78,7 @@ export function SettleScreen() {
           <p className="section-label">Suggested payments</p>
 
           {selectors.settlements.length === 0 && animatedSettlements.length === 0 ? (
-            <p className="text-xs text-ink-subtle">{trip.expenses.length === 0 ? 'Suggested payments will appear after an expense.' : 'All settled up.'}</p>
+            <p className="text-xs text-ink-subtle">{trip.expenses.length === 0 ? "Payments appear once there's something to settle." : 'All settled up.'}</p>
           ) : (
             <div className="motion-list" aria-live="polite">
               {animatedSettlements.map(({ item: settlement, key, phase }) => {
@@ -86,7 +86,7 @@ export function SettleScreen() {
                 return (
                   <div key={key} className={`motion-row is-${phase}`}>
                     {isExpanded ? (
-                      <div className="receipt-card receipt-enter cursor-pointer" onClick={() => setExpandedId(null)}>
+                      <div className="receipt-card cursor-pointer" onClick={() => setExpandedId(null)}>
                         <div className="receipt-head">
                           <div className="flex items-center gap-2 text-white text-sm font-semibold">
                             <span>{settlement.from}</span>
@@ -120,7 +120,7 @@ export function SettleScreen() {
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" />
               <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            Tap a payment to see the receipt explanation. All amounts precise to the cent.
+            Open a payment for the receipt explanation. Amounts stay precise to the cent.
           </div>
         </div>
       </div>

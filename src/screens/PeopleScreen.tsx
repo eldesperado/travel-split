@@ -81,7 +81,7 @@ export function PeopleScreen() {
                 </svg>
               </div>
               <p className="text-sm font-semibold text-ink-muted mb-1">No one added yet</p>
-              <p className="text-xs text-ink-subtle leading-relaxed">Type a name above to add the first traveler. Add everyone before recording expenses.</p>
+              <p className="text-xs text-ink-subtle leading-relaxed">Type a name above to add the first traveler.</p>
             </div>
           )}
 
@@ -96,12 +96,12 @@ export function PeopleScreen() {
                       <div className="avatar" style={{ background: person.avatarBg }}>{person.name[0]}</div>
                       <span className="flex-1 text-[15px] font-medium text-ink-primary">{person.name}</span>
                       <button
-                      className="btn-icon"
-                      disabled={isReferenced}
-                      style={isReferenced ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
-                      title={isReferenced ? 'Used in an expense — remove that expense first' : `Remove ${person.name}`}
-                      aria-label={`Remove ${person.name}`}
-                      onClick={() => void removePerson(person.id)}
+                        className="btn-icon"
+                        disabled={isReferenced}
+                        style={isReferenced ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
+                        title={isReferenced ? 'Used in an expense — remove that expense first' : `Remove ${person.name}`}
+                        aria-label={`Remove ${person.name}`}
+                        onClick={() => void removePerson(person.id)}
                       >
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -129,7 +129,7 @@ export function PeopleScreen() {
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" />
                   <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                Dimmed removes are blocked — that person is referenced by an expense.
+                People used in expenses can't be removed yet.
               </div>
             </div>
           )}
