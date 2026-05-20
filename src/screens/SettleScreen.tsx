@@ -4,9 +4,12 @@ import { formatCentsAbs } from '../domain/money';
 import { balanceLabel } from '../domain/split';
 import type { Balance, Settlement } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
+import { useNavigation } from '../ui/NavigationContext';
+import { getSettleEmptyAction, type EmptyStateTarget } from './emptyStateAction';
 
 export function SettleScreen() {
-  const { selectors } = useTripData();
+  const { trip, selectors } = useTripData();
+  const { goTo, layout } = useNavigation();
   const [expandedId, setExpandedId] = useState<string | null>(selectors.settlements[0]?.id ?? null);
   const animatedBalances = useAnimatedCollection(
     selectors.balances,
@@ -23,6 +26,9 @@ export function SettleScreen() {
     if (!expandedId && selectors.settlements[0]) setExpandedId(selectors.settlements[0].id);
   }, [expandedId, selectors.settlements]);
 
+  const settleEmptyAction = getSettleEmptyAction(trip);
+  const showMobileEmptyAction = layout === 'mobile' && settleEmptyAction != null;
+
   return (
     <div className="screen-body">
       <div className="panel">
@@ -36,17 +42,17 @@ export function SettleScreen() {
 
           <p className="section-label">Net balances</p>
 
-          {selectors.balances.length === 0 && animatedBalances.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M8 12l3 3 5-6" />
-                </svg>
+          {settleEmptyAction ? (
+            showMobileEmptyAction ? (
+              <button type="button" className="empty-state empty-state-action" onClick={() => goTo(settleEmptyAction.target)}>
+                <SettleEmptyContent target={settleEmptyAction.target} />
+                <span className="empty-state-cta">{settleEmptyAction.label} →</span>
+              </button>
+            ) : (
+              <div className="empty-state">
+                <SettleEmptyContent target={settleEmptyAction.target} />
               </div>
-              <p className="text-sm font-semibold text-ink-muted mb-1">Nothing to settle yet</p>
-              <p className="text-xs text-ink-subtle leading-relaxed">Add people and expenses to see balances.</p>
-            </div>
+            )
           ) : (
             <div className="motion-list" aria-live="polite">
               {animatedBalances.map(({ item: balance, key, phase }) => {
@@ -72,7 +78,7 @@ export function SettleScreen() {
           <p className="section-label">Suggested payments</p>
 
           {selectors.settlements.length === 0 && animatedSettlements.length === 0 ? (
-            <p className="text-xs text-ink-subtle">All settled up.</p>
+            <p className="text-xs text-ink-subtle">{trip.expenses.length === 0 ? 'Suggested payments will appear after an expense.' : 'All settled up.'}</p>
           ) : (
             <div className="motion-list" aria-live="polite">
               {animatedSettlements.map(({ item: settlement, key, phase }) => {
@@ -119,5 +125,24 @@ export function SettleScreen() {
         </div>
       </div>
     </div>
+  );
+}
+
+function SettleEmptyContent({ target }: { target: EmptyStateTarget }) {
+  const body = target === 'people'
+    ? 'Add travelers and a few expenses to see who pays whom.'
+    : 'Record at least one expense to see the split.';
+
+  return (
+    <>
+      <div className="empty-state-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 12l3 3 5-6" />
+        </svg>
+      </div>
+      <p className="text-sm font-semibold text-ink-muted mb-1">Nothing to settle yet</p>
+      <p className="text-xs text-ink-subtle leading-relaxed">{body}</p>
+    </>
   );
 }

@@ -3,11 +3,13 @@ import { ErrorCallout } from '../components/ErrorCallout';
 import { useScopedError, useTripData } from '../data/TripDataProvider';
 import type { Person } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
+import { useNavigation } from '../ui/NavigationContext';
 
 export function PeopleScreen() {
   const inputId = useId();
   const [nameInput, setNameInput] = useState('');
   const { trip, selectors, addPerson, removePerson, clearMessage } = useTripData();
+  const { registerInput } = useNavigation();
   const error = useScopedError('people');
   const animatedPeople = useAnimatedCollection(
     trip.people,
@@ -38,6 +40,7 @@ export function PeopleScreen() {
             <label className="field-label" htmlFor={inputId}>Add someone</label>
             <input
               id={inputId}
+              ref={(element) => registerInput('peopleName', element)}
               className="field-input"
               type="text"
               placeholder="Name"

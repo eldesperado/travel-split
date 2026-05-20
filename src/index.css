@@ -555,6 +555,39 @@
     @apply border-[1.5px] border-dashed border-border-dashed rounded-[10px] px-4 py-4 text-center mt-3;
   }
 
+  .empty-state-action {
+    width: 100%;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+    transition: transform 0.1s var(--ease-micro), border-color 0.16s var(--ease-micro), box-shadow 0.16s var(--ease-micro);
+  }
+
+  .empty-state-action:hover,
+  .empty-state-action:focus-visible {
+    border-color: #3f6f56;
+    box-shadow: 0 0 0 3px rgb(63 111 86 / .12);
+    outline: none;
+  }
+
+  .empty-state-action:active {
+    transform: scale(0.985);
+  }
+
+  .empty-state-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    margin-top: 12px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #e1eadf;
+    color: #244732;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   .empty-state-icon {
     display: flex;
     justify-content: center;

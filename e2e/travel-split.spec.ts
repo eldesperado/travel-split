@@ -98,6 +98,41 @@ test('mobile-width flow persists and settles', async ({ page }, testInfo) => {
   await page.screenshot({ path: 'artifacts/runtime-validation.png', fullPage: true });
 });
 
+test('mobile empty-state CTAs route to prerequisite inputs', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-phone', 'CTA routing runs on the mobile-phone scenario only.');
+  await resetTravelSplitDb(page);
+  const mobile = page.locator('[data-layout="mobile"]');
+  await expect(mobile).toBeVisible();
+
+  await mobile.getByRole('button', { name: /Go to People/ }).click();
+  await expect(mobile.getByRole('tab', { name: 'People' })).toHaveAttribute('aria-selected', 'true');
+  await expect(mobile.getByLabel('Add someone')).toBeFocused();
+
+  await mobile.getByLabel('Add someone').fill('Alex');
+  await mobile.getByRole('button', { name: 'Add to trip' }).click();
+  await expect(mobile.getByText('Alex')).toBeVisible();
+
+  await mobile.getByRole('tab', { name: 'Settle' }).click();
+  await mobile.getByRole('button', { name: /Record an expense/ }).click();
+  await expect(mobile.getByRole('tab', { name: 'Expenses' })).toHaveAttribute('aria-selected', 'true');
+  await expect(mobile.getByLabel('Title')).toBeFocused();
+});
+
+test('mobile empty-state CTA returns after deleting the last person', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-phone', 'CTA lifecycle regression runs on the mobile-phone scenario only.');
+  await resetTravelSplitDb(page);
+  const mobile = page.locator('[data-layout="mobile"]');
+  await expect(mobile).toBeVisible();
+
+  await mobile.getByRole('tab', { name: 'People' }).click();
+  await mobile.getByLabel('Add someone').fill('Alex');
+  await mobile.getByRole('button', { name: 'Add to trip' }).click();
+  await mobile.getByRole('button', { name: 'Remove Alex' }).click();
+
+  await mobile.getByRole('tab', { name: 'Expenses' }).click();
+  await expect(mobile.getByRole('button', { name: /Go to People/ })).toBeVisible();
+});
+
 test('custom weighted split points missing amount back to amount field and then saves', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-phone', 'Custom split regression runs on the mobile-phone scenario only.');
   await resetTravelSplitDb(page);
@@ -151,6 +186,7 @@ test('desktop-width workspace flow shows all panels at once', async ({ page }, t
   await expect(desktop.getByRole('heading', { name: 'Trip group' })).toBeVisible();
   await expect(desktop.getByRole('heading', { name: 'Activities & costs' })).toBeVisible();
   await expect(desktop.getByRole('heading', { name: 'Who pays whom' })).toBeVisible();
+  await expect(desktop.getByRole('button', { name: /Go to People|Add people|Record an expense/ })).toHaveCount(0);
 
   await desktop.getByLabel('Add someone').fill('Alex');
   await desktop.getByRole('button', { name: 'Add to trip' }).click();

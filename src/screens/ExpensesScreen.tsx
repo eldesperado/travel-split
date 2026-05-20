@@ -5,7 +5,9 @@ import { isAmountErrorMessage } from '../domain/errors';
 import { formatCentsAbs, parseAmountToCents } from '../domain/money';
 import type { Expense, ExpenseParticipant } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
+import { useNavigation } from '../ui/NavigationContext';
 import { isStaleEditTarget, prepareEditState } from './editState';
+import { getExpensesEmptyAction } from './emptyStateAction';
 
 export function ExpensesScreen() {
   const titleId = useId();
@@ -13,9 +15,10 @@ export function ExpensesScreen() {
   const payerId = useId();
   const weightPrefix = useId();
   const { trip, upsertExpense, deleteExpense, clearMessage } = useTripData();
+  const { goTo, layout, registerInput } = useNavigation();
   const error = useScopedError('expenses');
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const amountInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const amountInputRef = useRef<HTMLInputElement | null>(null);
   const weightInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -140,6 +143,13 @@ export function ExpensesScreen() {
     selectedWeightTotal,
     tripPeopleCount: trip.people.length,
   });
+  const expensesEmptyAction = getExpensesEmptyAction(trip);
+  const showMobileEmptyAction = layout === 'mobile' && expensesEmptyAction != null && !editingId;
+
+  function registerTitleInput(element: HTMLInputElement | null) {
+    titleInputRef.current = element;
+    registerInput('expenseTitle', element);
+  }
 
   return (
     <div className="screen-body">
@@ -160,22 +170,21 @@ export function ExpensesScreen() {
           <ErrorCallout message={error} onDismiss={clearMessage} />
 
           {trip.people.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
+            showMobileEmptyAction ? (
+              <button type="button" className="empty-state empty-state-action" onClick={() => goTo(expensesEmptyAction.target)}>
+                <ExpensesEmptyContent />
+                <span className="empty-state-cta">{expensesEmptyAction.label} →</span>
+              </button>
+            ) : (
+              <div className="empty-state">
+                <ExpensesEmptyContent />
               </div>
-              <p className="text-sm font-semibold text-ink-muted mb-1">Add people first</p>
-              <p className="text-xs text-ink-subtle leading-relaxed">Expenses need a payer and split participants before they can be saved.</p>
-            </div>
+            )
           ) : (
             <>
               <div className="field">
                 <label className="field-label" htmlFor={titleId}>Title</label>
-                <input id={titleId} ref={titleInputRef} className="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" value={title} onChange={(event) => setTitle(event.target.value)} />
+                <input id={titleId} ref={registerTitleInput} className="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" value={title} onChange={(event) => setTitle(event.target.value)} />
               </div>
 
               <div className="field">
@@ -288,6 +297,22 @@ export function ExpensesScreen() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ExpensesEmptyContent() {
+  return (
+    <>
+      <div className="empty-state-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      </div>
+      <p className="text-sm font-semibold text-ink-muted mb-1">Add people first</p>
+      <p className="text-xs text-ink-subtle leading-relaxed">Expenses need a payer and split participants before they can be saved.</p>
+    </>
   );
 }
 

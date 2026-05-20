@@ -5,6 +5,7 @@ import { TripDataProvider, useTripData } from './data/TripDataProvider';
 import { ExpensesScreen } from './screens/ExpensesScreen';
 import { PeopleScreen } from './screens/PeopleScreen';
 import { SettleScreen } from './screens/SettleScreen';
+import { NavigationProvider } from './ui/NavigationContext';
 import { useResponsiveLayout } from './ui/usePlatformLayout';
 
 export default function App() {
@@ -22,39 +23,43 @@ function TravelSplitShell() {
 
   if (layout === 'mobile') {
     return (
-      <div className="app-shell mobile-app-shell" data-layout="mobile">
-        <NavBar showCopy={activeTab === 'settle'} />
-        <TripBanner />
+      <NavigationProvider layout={layout} onMobileTabChange={setActiveTab}>
+        <div className="app-shell mobile-app-shell" data-layout="mobile">
+          <NavBar showCopy={activeTab === 'settle'} />
+          <TripBanner />
 
-        {status === 'loading' ? (
-          <div className="screen-body flex items-center justify-center text-sm text-ink-subtle">Loading your trip…</div>
-        ) : (
-          <div key={activeTab} className="flex-1 min-h-0 overflow-hidden screen-enter flex flex-col">
-            {activeTab === 'people' && <PeopleScreen />}
-            {activeTab === 'expenses' && <ExpensesScreen />}
-            {activeTab === 'settle' && <SettleScreen />}
-          </div>
-        )}
+          {status === 'loading' ? (
+            <div className="screen-body flex items-center justify-center text-sm text-ink-subtle">Loading your trip…</div>
+          ) : (
+            <div key={activeTab} className="flex-1 min-h-0 overflow-hidden screen-enter flex flex-col">
+              {activeTab === 'people' && <PeopleScreen />}
+              {activeTab === 'expenses' && <ExpensesScreen />}
+              {activeTab === 'settle' && <SettleScreen />}
+            </div>
+          )}
 
-        <TabBar active={activeTab} onSelect={setActiveTab} expenseCount={trip.expenses.length} />
-      </div>
+          <TabBar active={activeTab} onSelect={setActiveTab} expenseCount={trip.expenses.length} />
+        </div>
+      </NavigationProvider>
     );
   }
 
   return (
-    <div className="desktop-app-shell" data-layout="desktop">
-      <DesktopHeader />
-      <TripBanner />
-      {status === 'loading' ? (
-        <div className="desktop-loading">Loading your trip…</div>
-      ) : (
-        <main className="desktop-workspace" aria-label="Travel Split workspace">
-          <PeopleScreen />
-          <ExpensesScreen />
-          <SettleScreen />
-        </main>
-      )}
-    </div>
+    <NavigationProvider layout={layout} onMobileTabChange={setActiveTab}>
+      <div className="desktop-app-shell" data-layout="desktop">
+        <DesktopHeader />
+        <TripBanner />
+        {status === 'loading' ? (
+          <div className="desktop-loading">Loading your trip…</div>
+        ) : (
+          <main className="desktop-workspace" aria-label="Travel Split workspace">
+            <PeopleScreen />
+            <ExpensesScreen />
+            <SettleScreen />
+          </main>
+        )}
+      </div>
+    </NavigationProvider>
   );
 }
 
