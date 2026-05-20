@@ -54,9 +54,12 @@ The Settle tab turns the ledger into an action list: each traveler has a clear n
 
 - **Add people** — build the trip group quickly with local names.
 - **Record expenses** — enter an activity, amount, payer, and split participants.
+- **Edit and delete expenses** — revise any saved expense in place; remove people who aren't tied to an expense.
 - **Equal and weighted splits** — default to equal splits, with support for custom weights.
 - **Settlement suggestions** — calculate who should pay whom to settle balances.
 - **Receipt-style explanations** — show why each suggested payment exists.
+- **Scoped validation** — each panel shows only its own validation errors, styled distinctly from neutral disclaimers.
+- **Trip notifications** — a single banner surfaces global state (new trip ready, storage recovered) without crowding panel content.
 - **Local persistence** — save the active trip in the browser using IndexedDB.
 - **Responsive layouts** — use a mobile tab layout below 980px and a desktop three-column workspace at wider widths.
 - **Private by default** — trip data stays in the browser; there is no server-side storage.
@@ -85,6 +88,7 @@ flowchart LR
   Reducer --> Domain[Domain logic]
   Domain --> Money[Integer-cent money math]
   Domain --> Split[Split + settlement engine]
+  Domain --> Errors[Validation messages + source mapping]
   Provider --> Repo[TripRepository]
   Repo --> IDB[(IndexedDB snapshot)]
 
@@ -169,4 +173,4 @@ If verification fails, the previous successful GitHub Pages deployment remains l
 
 ## Current status
 
-Travel Split is deployed as a working static web app and validated on both desktop and mobile layouts.
+Travel Split is deployed on GitHub Pages with desktop and mobile layouts, scoped validation messaging, a trip-level notification banner, and IndexedDB persistence. Vitest covers the domain layer (money math, splitting, reducers, error mapping); Playwright drives the People → Expenses → Settle flow end-to-end.
