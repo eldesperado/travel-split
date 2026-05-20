@@ -5,7 +5,7 @@ import { TripDataProvider, useTripData } from './data/TripDataProvider';
 import { ExpensesScreen } from './screens/ExpensesScreen';
 import { PeopleScreen } from './screens/PeopleScreen';
 import { SettleScreen } from './screens/SettleScreen';
-import { usePlatformLayout } from './ui/usePlatformLayout';
+import { useResponsiveLayout } from './ui/usePlatformLayout';
 
 export default function App() {
   return (
@@ -18,7 +18,7 @@ export default function App() {
 function TravelSplitShell() {
   const [activeTab, setActiveTab] = useState<TabId>('expenses');
   const { trip, status } = useTripData();
-  const layout = usePlatformLayout();
+  const layout = useResponsiveLayout();
 
   if (layout === 'mobile') {
     return (

@@ -1,25 +1,25 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 
-export type PlatformLayout = 'mobile' | 'desktop';
+export type AppLayout = 'mobile' | 'desktop';
 
-type NavigatorWithUserAgentData = Navigator & {
-  userAgentData?: {
-    mobile?: boolean;
-    platform?: string;
-  };
-};
+export const DESKTOP_LAYOUT_MIN_WIDTH = 980;
 
-export function usePlatformLayout(): PlatformLayout {
-  return useMemo(() => (isMobileBrowserPlatform() ? 'mobile' : 'desktop'), []);
+export function getLayoutForViewport(width: number): AppLayout {
+  return width >= DESKTOP_LAYOUT_MIN_WIDTH ? 'desktop' : 'mobile';
 }
 
-export function isMobileBrowserPlatform(): boolean {
-  // Presentation-only detector. Do not use this for permissions, persistence, or security decisions.
-  if (typeof navigator === 'undefined') return false;
+export function useResponsiveLayout(): AppLayout {
+  const [layout, setLayout] = useState<AppLayout>(() => {
+    if (typeof window === 'undefined') return 'desktop';
+    return getLayoutForViewport(window.innerWidth);
+  });
 
-  const nav = navigator as NavigatorWithUserAgentData;
-  if (typeof nav.userAgentData?.mobile === 'boolean') return nav.userAgentData.mobile;
+  useEffect(() => {
+    const updateLayout = () => setLayout(getLayoutForViewport(window.innerWidth));
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
 
-  const userAgent = navigator.userAgent || '';
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
+  return layout;
 }

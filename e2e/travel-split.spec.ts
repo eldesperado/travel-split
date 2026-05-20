@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+const DESKTOP_LAYOUT_MIN_WIDTH = 980;
+
 async function resetTravelSplitDb(page: Page) {
   await page.goto('/');
   await page.evaluate(async () => {
@@ -13,18 +15,23 @@ async function resetTravelSplitDb(page: Page) {
   await page.reload();
 }
 
-function isMobileProject(projectName: string) {
-  return projectName.startsWith('mobile');
+function expectsMobileLayout(page: Page) {
+  return (page.viewportSize()?.width ?? DESKTOP_LAYOUT_MIN_WIDTH) < DESKTOP_LAYOUT_MIN_WIDTH;
 }
 
-test('shell selection follows browser platform, not viewport', async ({ page }, testInfo) => {
+test('shell selection follows viewport width', async ({ page }) => {
   await resetTravelSplitDb(page);
-  const expectsMobile = isMobileProject(testInfo.project.name);
+  const expectsMobile = expectsMobileLayout(page);
 
   if (expectsMobile) {
-    await expect(page.locator('[data-layout="mobile"]')).toBeVisible();
+    const mobileShell = page.locator('[data-layout="mobile"]');
+    await expect(mobileShell).toBeVisible();
     await expect(page.locator('[data-layout="desktop"]')).toHaveCount(0);
     await expect(page.getByRole('tablist', { name: 'App sections' })).toBeVisible();
+
+    const shellBox = await mobileShell.boundingBox();
+    expect(shellBox).not.toBeNull();
+    expect(shellBox!.width).toBeLessThanOrEqual(720);
   } else {
     await expect(page.locator('[data-layout="desktop"]')).toBeVisible();
     await expect(page.locator('[data-layout="mobile"]')).toHaveCount(0);
@@ -35,8 +42,22 @@ test('shell selection follows browser platform, not viewport', async ({ page }, 
   }
 });
 
-test('mobile-platform phone flow persists and settles', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile-phone', 'Full mobile flow runs on the mobile-phone scenario only.');
+test('resizing a desktop browser switches between mobile and desktop shells', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-wide', 'Resize behavior is covered once in desktop-wide.');
+  await resetTravelSplitDb(page);
+
+  await expect(page.locator('[data-layout="desktop"]')).toBeVisible();
+  await page.setViewportSize({ width: 461, height: 900 });
+  await expect(page.locator('[data-layout="mobile"]')).toBeVisible();
+  await expect(page.locator('[data-layout="desktop"]')).toHaveCount(0);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.locator('[data-layout="desktop"]')).toBeVisible();
+  await expect(page.locator('[data-layout="mobile"]')).toHaveCount(0);
+});
+
+test('mobile-width flow persists and settles', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-phone', 'Full mobile-width flow runs on the mobile-phone scenario only.');
   await resetTravelSplitDb(page);
   const mobile = page.locator('[data-layout="mobile"]');
   await expect(mobile.getByText('Travel Split')).toBeVisible();
@@ -68,8 +89,8 @@ test('mobile-platform phone flow persists and settles', async ({ page }, testInf
   await page.screenshot({ path: 'artifacts/runtime-validation.png', fullPage: true });
 });
 
-test('desktop-platform wide workspace flow shows all panels at once', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop-wide', 'Full desktop flow runs on the desktop-wide scenario only.');
+test('desktop-width workspace flow shows all panels at once', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-wide', 'Full desktop-width flow runs on the desktop-wide scenario only.');
   await resetTravelSplitDb(page);
   const desktop = page.locator('[data-layout="desktop"]');
   await expect(desktop).toBeVisible();
@@ -83,8 +104,10 @@ test('desktop-platform wide workspace flow shows all panels at once', async ({ p
 
   await desktop.getByLabel('Add someone').fill('Alex');
   await desktop.getByRole('button', { name: 'Add to trip' }).click();
+  await expect(desktop.getByText('Alex').first()).toBeVisible();
   await desktop.getByLabel('Add someone').fill('Mina');
   await desktop.getByRole('button', { name: 'Add to trip' }).click();
+  await expect(desktop.getByText('Mina').first()).toBeVisible();
   await desktop.getByLabel('Title').fill('Dinner');
   await desktop.getByLabel('Amount').fill('40');
   await desktop.getByLabel('Paid by').selectOption({ label: 'Alex' });
