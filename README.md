@@ -31,23 +31,20 @@ The screenshots below use a sample trip with three travelers — Alex, Mina, and
 | <a href="docs/screenshots/desktop-workspace.png"><img src="docs/screenshots/desktop-workspace.png" width="100%" alt="Travel Split desktop workspace with sample trip data" /></a> | <a href="docs/screenshots/mobile-tabs.png"><img src="docs/screenshots/mobile-tabs.png" width="100%" alt="Travel Split mobile Expenses tab" /></a> | <a href="docs/screenshots/mobile-settle.png"><img src="docs/screenshots/mobile-settle.png" width="100%" alt="Travel Split mobile Settle tab" /></a> |
 | Three-column layout: roster, expense form with recent list, and live settlement. | Bottom tab bar with the active Expenses pill and a count badge. | Net balances, suggested payments, and a selected-payment receipt. |
 
-**Desktop** is optimized for planning or reviewing a trip on a laptop. People, Expenses, and Settlement live in one workspace so every new expense immediately updates net balances and suggested payments — no screen switching.
+**Desktop** shows People, Expenses, and Settle side by side. Add a cost and the balances update immediately.
 
-**Mobile** uses a bottom tab bar with three destinations: People (manage travelers), Expenses (record shared costs, with a count badge), and Settle (review who pays whom). The selected tab uses a filled pill around the icon and label for a clear active state while preserving large touch targets. On the Settle tab, tapping a suggested payment expands a receipt-style explanation precise to the cent.
+**Mobile** keeps the same flow in three tabs: People → Expenses → Settle. Helpful prompts take you to the next step, but you can still switch tabs anytime. On Settle, tap a payment to see why it is suggested.
 
 ## Main features
 
-- **Add people** — build the trip group quickly with local names.
-- **Record expenses** — enter an activity, amount, payer, and split participants.
-- **Edit and delete expenses** — revise any saved expense in place; remove people who aren't tied to an expense.
-- **Equal and weighted splits** — default to equal splits, with support for custom weights.
-- **Settlement suggestions** — calculate who should pay whom to settle balances.
-- **Receipt-style explanations** — show why each suggested payment exists.
-- **Scoped validation** — each panel shows only its own validation errors, styled distinctly from neutral disclaimers.
-- **Trip notifications** — a single banner surfaces global state (new trip ready, storage recovered) without crowding panel content.
-- **Local persistence** — save the active trip in the browser using IndexedDB.
-- **Responsive layouts** — use a mobile tab layout below 980px and a desktop three-column workspace at wider widths.
-- **Private by default** — trip data stays in the browser; there is no server-side storage.
+- **Add people fast** — after each person, the name field is ready for the next one.
+- **Record shared costs** — add the title, amount, payer, and who should split it.
+- **Edit or delete expenses** — fix saved costs in place.
+- **Equal or weighted splits** — split evenly by default, or customize shares.
+- **Settle up** — see the simplest payments to balance the trip.
+- **Clear explanations** — tap a payment to see why it exists.
+- **Helpful prompts** — empty screens and banners take you to the right next step.
+- **Private by default** — data stays in your browser; there are no accounts or servers.
 
 ## Product scope
 
@@ -112,8 +109,10 @@ sequenceDiagram
 - **Persistence seam:** `TripRepository` hides IndexedDB so a future SQLite store can be added without rewriting UI logic.
 - **Deterministic money math:** amounts are stored as integer cents and allocated with stable rounding behavior.
 - **Responsive shell:** viewport width selects mobile tabs or desktop workspace; both shells share the same domain and data provider.
+- **Guided flow:** People, Expenses, and Settle can point users to the next step while still allowing free navigation.
 - **Scoped error surface:** validation errors carry a source (`people`, `expenses`, `global`) so each panel renders only its own; storage failures fall through as global. Source mapping lives in `src/domain/errors.ts`.
-- **Plain-English micro-copy:** user-facing messages live in `ERROR_MESSAGES` / `WARNING_MESSAGES`. The voice is action-led ("Add an amount.", "Pick who paid."), no jargon, and every error names the next step.
+- **Plain-English micro-copy:** messages are short and action-led, like "Add an amount." or "Pick who paid."
+- **Restrained motion:** the UI favors stable layout, clear focus rings, and calm hierarchy over decorative micro-animations.
 
 ## Tech stack
 
@@ -158,4 +157,4 @@ If verification fails, the previous successful GitHub Pages deployment remains l
 
 ## Current status
 
-Travel Split is deployed on GitHub Pages with desktop and mobile layouts, scoped validation messaging, a trip-level notification banner, and IndexedDB persistence. Vitest covers the domain layer (money math, splitting, reducers, error mapping); Playwright drives the People → Expenses → Settle flow end-to-end.
+Travel Split is deployed on GitHub Pages with desktop and mobile layouts, helpful next-step prompts, clear validation messages, calm UI styling, and local browser storage. Vitest covers the domain logic and prompt decisions; Playwright checks the People → Expenses → Settle flow end to end.
