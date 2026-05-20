@@ -240,16 +240,6 @@
 
   .desktop-workspace .receipt-card { border-radius: 10px; }
 
-  .desktop-header-actions {
-    @apply flex items-center gap-2;
-    padding-top: 6px;
-  }
-
-  .desktop-copy-button {
-    height: 36px;
-    font-size: 13px;
-  }
-
   /* ── Status bar (mockup only — real browser ignores) ── */
   .status-bar {
     @apply flex items-end justify-between px-6 pt-0 pb-2 h-[54px] flex-shrink-0 font-mono text-sm font-semibold text-ink-primary;

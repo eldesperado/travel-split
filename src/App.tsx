@@ -57,18 +57,6 @@ function TravelSplitShell() {
 }
 
 function DesktopHeader() {
-  const { shareSummary } = useTripData();
-  const [copyStatus, setCopyStatus] = useState('');
-
-  async function copySummary() {
-    try {
-      await navigator.clipboard.writeText(shareSummary);
-      setCopyStatus('Copied');
-    } catch {
-      setCopyStatus('Copy failed');
-    }
-  }
-
   return (
     <header className="desktop-header">
       <div>
@@ -84,16 +72,7 @@ function DesktopHeader() {
         <p className="desktop-tagline">One screen · No accounts · Stays on your device</p>
       </div>
 
-      <div className="desktop-header-actions">
-        <span className="text-[12px] text-ink-subtle" role="status" aria-live="polite">{copyStatus}</span>
-        <button className="btn-secondary desktop-copy-button" type="button" onClick={copySummary}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2" />
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          Copy summary
-        </button>
-      </div>
+
     </header>
   );
 }
