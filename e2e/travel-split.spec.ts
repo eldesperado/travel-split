@@ -82,14 +82,17 @@ test('mobile-width flow persists and settles', async ({ page }, testInfo) => {
   await mobile.getByRole('button', { name: 'Add to trip' }).click();
   await expect(mobile.getByText('Mina')).toBeVisible();
 
-  await mobile.getByRole('tab', { name: 'Expenses' }).click();
+  await mobile.getByRole('button', { name: /Record an expense/ }).click();
+  await expect(mobile.getByRole('tab', { name: 'Expenses' })).toHaveAttribute('aria-selected', 'true');
+  await expect(mobile.getByLabel('Title')).toBeFocused();
   await mobile.getByLabel('Title').fill('Dinner');
   await mobile.getByLabel('Amount').fill('40');
   await mobile.getByLabel('Paid by').selectOption({ label: 'Alex' });
   await mobile.getByRole('button', { name: 'Save expense' }).click();
   await expect(mobile.getByText('Dinner')).toBeVisible();
 
-  await mobile.getByRole('tab', { name: 'Settle' }).click();
+  await mobile.getByRole('button', { name: /Review settlement/ }).click();
+  await expect(mobile.getByRole('tab', { name: 'Settle' })).toHaveAttribute('aria-selected', 'true');
   await expect(mobile.getByText('Mina').first()).toBeVisible();
   await expect(mobile.getByText('Alex').first()).toBeVisible();
   await expect(mobile.getByText('$20.00').first()).toBeVisible();

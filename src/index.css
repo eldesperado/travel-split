@@ -547,6 +547,57 @@
   .settlement-row:active { transform: scale(0.98); opacity: 0.85; }
   .settlement-row:last-child { @apply mb-0; }
 
+  /* ── Next-step guidance ── */
+  .next-step-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #d0daca;
+    border-radius: 10px;
+    background: #edf2eb;
+  }
+
+  .next-step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #244732;
+    margin-bottom: 2px;
+  }
+
+  .next-step-body {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #667064;
+  }
+
+  .next-step-button {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: #244732;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s var(--ease-micro), opacity 0.1s var(--ease-micro);
+  }
+
+  .next-step-button:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+
+  .next-step-button:focus-visible {
+    outline: 2px solid #3f6f56;
+    outline-offset: 2px;
+  }
+
   /* ── Info callout (neutral, e.g. disclaimers and tips) ── */
   .info-callout {
     @apply flex items-start gap-2 px-3 py-2.5 bg-brand-row border border-border-row rounded-lg text-[11px] text-ink-subtle leading-relaxed my-3;

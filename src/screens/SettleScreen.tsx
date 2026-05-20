@@ -9,7 +9,7 @@ import { getSettleEmptyAction, type EmptyStateTarget } from './emptyStateAction'
 
 export function SettleScreen() {
   const { trip, selectors } = useTripData();
-  const { goTo, layout } = useNavigation();
+  const { goTo, layout, registerPanel } = useNavigation();
   const [expandedId, setExpandedId] = useState<string | null>(selectors.settlements[0]?.id ?? null);
   const animatedBalances = useAnimatedCollection(
     selectors.balances,
@@ -30,7 +30,7 @@ export function SettleScreen() {
   const showMobileEmptyAction = layout === 'mobile' && settleEmptyAction != null;
 
   return (
-    <div className="screen-body">
+    <div className="screen-body" ref={(element) => registerPanel('settle', element)} tabIndex={-1}>
       <div className="panel">
         <div className="panel-inner">
           <div className="panel-head">

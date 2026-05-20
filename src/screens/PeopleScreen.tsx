@@ -4,19 +4,21 @@ import { useScopedError, useTripData } from '../data/TripDataProvider';
 import type { Person } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
 import { useNavigation } from '../ui/NavigationContext';
+import { getPeopleNextStepAction } from './nextStepAction';
 
 export function PeopleScreen() {
   const inputId = useId();
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [nameInput, setNameInput] = useState('');
   const { trip, selectors, addPerson, removePerson, clearMessage } = useTripData();
-  const { registerInput } = useNavigation();
+  const { goTo, registerInput, registerPanel } = useNavigation();
   const error = useScopedError('people');
   const animatedPeople = useAnimatedCollection(
     trip.people,
     useCallback((person: Person) => person.id, []),
     useCallback((person: Person) => `${person.name}:${person.avatarBg}`, []),
   );
+  const nextStepAction = getPeopleNextStepAction(trip);
 
   async function submitPerson() {
     const added = await addPerson(nameInput);
@@ -32,7 +34,7 @@ export function PeopleScreen() {
   }
 
   return (
-    <div className="screen-body">
+    <div className="screen-body" ref={(element) => registerPanel('people', element)} tabIndex={-1}>
       <div className="panel">
         <div className="panel-inner">
           <div className="panel-head">
@@ -109,6 +111,18 @@ export function PeopleScreen() {
                   );
                 })}
               </div>
+
+              {nextStepAction && (
+                <div className="next-step-card">
+                  <div>
+                    <p className="next-step-title">Ready to add expenses?</p>
+                    <p className="next-step-body">Add costs whenever the trip group is ready.</p>
+                  </div>
+                  <button type="button" className="next-step-button" onClick={() => goTo(nextStepAction.target)}>
+                    {nextStepAction.label} →
+                  </button>
+                </div>
+              )}
 
               <div className="info-callout">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" className="flex-shrink-0 mt-px" aria-hidden="true">

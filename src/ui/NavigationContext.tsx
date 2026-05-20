@@ -2,13 +2,14 @@ import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode
 import type { TabId } from '../components/TabBar';
 import type { AppLayout } from './usePlatformLayout';
 
-export type NavigationTarget = 'people' | 'expenses';
+export type NavigationTarget = 'people' | 'expenses' | 'settle';
 type NavigationInputKey = 'peopleName' | 'expenseTitle';
 
 type NavigationContextValue = {
   layout: AppLayout;
   goTo: (target: NavigationTarget) => void;
   registerInput: (key: NavigationInputKey, element: HTMLInputElement | null) => void;
+  registerPanel: (key: NavigationTarget, element: HTMLElement | null) => void;
 };
 
 const NavigationContext = createContext<NavigationContextValue | null>(null);
@@ -26,12 +27,17 @@ export function NavigationProvider({
     peopleName: null,
     expenseTitle: null,
   });
+  const panelsRef = useRef<Record<NavigationTarget, HTMLElement | null>>({
+    people: null,
+    expenses: null,
+    settle: null,
+  });
 
   const focusTarget = useCallback((target: NavigationTarget) => {
-    const key = target === 'people' ? 'peopleName' : 'expenseTitle';
-    const input = inputsRef.current[key];
-    input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    input?.focus({ preventScroll: true });
+    const inputKey = target === 'people' ? 'peopleName' : target === 'expenses' ? 'expenseTitle' : null;
+    const element = inputKey ? inputsRef.current[inputKey] : panelsRef.current[target];
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    element?.focus({ preventScroll: true });
   }, []);
 
   const goTo = useCallback((target: NavigationTarget) => {
@@ -48,7 +54,11 @@ export function NavigationProvider({
     inputsRef.current[key] = element;
   }, []);
 
-  const value = useMemo(() => ({ layout, goTo, registerInput }), [goTo, layout, registerInput]);
+  const registerPanel = useCallback((key: NavigationTarget, element: HTMLElement | null) => {
+    panelsRef.current[key] = element;
+  }, []);
+
+  const value = useMemo(() => ({ layout, goTo, registerInput, registerPanel }), [goTo, layout, registerInput, registerPanel]);
 
   return <NavigationContext.Provider value={value}>{children}</NavigationContext.Provider>;
 }

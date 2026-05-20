@@ -8,6 +8,7 @@ import { useAnimatedCollection } from '../ui/useAnimatedCollection';
 import { useNavigation } from '../ui/NavigationContext';
 import { isStaleEditTarget, prepareEditState } from './editState';
 import { getExpensesEmptyAction } from './emptyStateAction';
+import { getExpensesNextStepAction } from './nextStepAction';
 
 export function ExpensesScreen() {
   const titleId = useId();
@@ -15,7 +16,7 @@ export function ExpensesScreen() {
   const payerId = useId();
   const weightPrefix = useId();
   const { trip, upsertExpense, deleteExpense, clearMessage } = useTripData();
-  const { goTo, layout, registerInput } = useNavigation();
+  const { goTo, layout, registerInput, registerPanel } = useNavigation();
   const error = useScopedError('expenses');
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const amountInputRef = useRef<HTMLInputElement | null>(null);
@@ -144,6 +145,7 @@ export function ExpensesScreen() {
     tripPeopleCount: trip.people.length,
   });
   const expensesEmptyAction = getExpensesEmptyAction(trip);
+  const nextStepAction = getExpensesNextStepAction(trip);
   const showMobileEmptyAction = layout === 'mobile' && expensesEmptyAction != null && !editingId;
 
   function registerTitleInput(element: HTMLInputElement | null) {
@@ -152,7 +154,7 @@ export function ExpensesScreen() {
   }
 
   return (
-    <div className="screen-body">
+    <div className="screen-body" ref={(element) => registerPanel('expenses', element)} tabIndex={-1}>
       <div className="panel">
         <div className="panel-inner">
           <div className="panel-head">
@@ -265,7 +267,8 @@ export function ExpensesScreen() {
           {trip.expenses.length === 0 && animatedExpenses.length === 0 ? (
             <p className="text-xs text-ink-subtle">No expenses yet.</p>
           ) : (
-            <div className="motion-list" aria-live="polite">
+            <>
+              <div className="motion-list" aria-live="polite">
               {animatedExpenses.map(({ item: expense, key, phase }) => {
                 const payer = trip.people.find((person) => person.id === expense.payerId);
                 const weighted = expense.participants.some((participant) => participant.weight !== 1);
@@ -292,7 +295,19 @@ export function ExpensesScreen() {
                   </div>
                 );
               })}
-            </div>
+              </div>
+              {nextStepAction && !editingId && (
+                <div className="next-step-card">
+                  <div>
+                    <p className="next-step-title">Ready to settle up?</p>
+                    <p className="next-step-body">Review who pays whom after recording expenses.</p>
+                  </div>
+                  <button type="button" className="next-step-button" onClick={() => goTo(nextStepAction.target)}>
+                    {nextStepAction.label} →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
