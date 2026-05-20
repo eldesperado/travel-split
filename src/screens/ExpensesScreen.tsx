@@ -5,6 +5,7 @@ import { isAmountErrorMessage } from '../domain/errors';
 import { formatCentsAbs, parseAmountToCents } from '../domain/money';
 import type { Expense, ExpenseParticipant } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
+import { isStaleEditTarget, prepareEditState } from './editState';
 
 export function ExpensesScreen() {
   const titleId = useId();
@@ -82,16 +83,15 @@ export function ExpensesScreen() {
   }
 
   function startEdit(expense: Expense) {
+    const next = prepareEditState(expense, trip.people, customizeOpen);
     setEditingId(expense.id);
-    setTitle(expense.title);
-    setAmount((expense.amountCents / 100).toFixed(2));
-    setPaidBy(expense.payerId);
-    const weighted = expense.participants.some((p) => p.weight !== 1);
-    if (weighted && !customizeOpen) skipNextSaveScrollRef.current = true;
-    setCustomizeOpen(weighted);
-    const participantMap = new Map(expense.participants.map((p) => [p.personId, p.weight]));
-    setIncluded(Object.fromEntries(trip.people.map((p) => [p.id, participantMap.has(p.id)])));
-    setWeights(Object.fromEntries(trip.people.map((p) => [p.id, String(participantMap.get(p.id) ?? 1)])));
+    setTitle(next.title);
+    setAmount(next.amount);
+    setPaidBy(next.paidBy);
+    if (next.skipNextSaveScroll) skipNextSaveScrollRef.current = true;
+    setCustomizeOpen(next.customizeOpen);
+    setIncluded(next.included);
+    setWeights(next.weights);
     clearMessage();
     requestAnimationFrame(() => {
       titleInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -120,7 +120,7 @@ export function ExpensesScreen() {
   }, [customizeOpen]);
 
   useEffect(() => {
-    if (editingId && !trip.expenses.some((expense) => expense.id === editingId)) {
+    if (isStaleEditTarget(editingId, trip.expenses)) {
       setEditingId(null);
       setTitle('');
       setAmount('');
