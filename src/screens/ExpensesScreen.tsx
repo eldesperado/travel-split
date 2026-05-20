@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTripData } from '../data/TripDataProvider';
+import { isAmountErrorMessage } from '../domain/errors';
 import { formatCentsAbs, parseAmountToCents } from '../domain/money';
 import type { Expense, ExpenseParticipant } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
@@ -60,33 +61,32 @@ export function ExpensesScreen() {
     }
 
     if (amountInvalidBeforeSave) {
-      amountInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      amountInputRef.current?.focus({ preventScroll: true });
+      focusInput(amountInputRef.current);
       return;
     }
 
     if (titleInvalidBeforeSave) {
-      titleInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      titleInputRef.current?.focus({ preventScroll: true });
+      focusInput(titleInputRef.current);
       return;
     }
 
     if (invalidWeightBeforeSave && invalidWeightPersonId) {
-      weightInputRefs.current[invalidWeightPersonId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      weightInputRefs.current[invalidWeightPersonId]?.focus({ preventScroll: true });
+      focusInput(weightInputRefs.current[invalidWeightPersonId]);
     }
   }
 
-  const amountErrorMessages = ['Enter an amount.', 'Use dollars and cents, like 40 or 40.50.', 'Amount must be greater than zero.', 'Amount is too large.'];
-  const amountHasError = error ? amountErrorMessages.includes(error) : false;
-  const selectedWeightTotal = selectedParticipants.reduce((sum, participant) => (
-    Number.isFinite(participant.weight) && participant.weight > 0 ? sum + participant.weight : sum
-  ), 0);
-  const selectedSummary = customizeOpen
-    ? invalidWeightPersonId
-      ? `${selectedPeople.length} selected · fix weights`
-      : `${selectedPeople.length} selected · total weight ${selectedWeightTotal}`
-    : `Split equally across ${trip.people.length} people`;
+  const amountHasError = isAmountErrorMessage(error);
+  const selectedWeightTotal = selectedParticipants.reduce((sum, participant) => {
+    if (!Number.isFinite(participant.weight) || participant.weight <= 0) return sum;
+    return sum + participant.weight;
+  }, 0);
+  const selectedSummary = getSelectedSummary({
+    customizeOpen,
+    invalidWeightPersonId,
+    selectedCount: selectedPeople.length,
+    selectedWeightTotal,
+    tripPeopleCount: trip.people.length,
+  });
 
   return (
     <div className="screen-body">
@@ -222,8 +222,26 @@ export function ExpensesScreen() {
   );
 }
 
+type SelectedSummaryInput = {
+  customizeOpen: boolean;
+  invalidWeightPersonId?: string;
+  selectedCount: number;
+  selectedWeightTotal: number;
+  tripPeopleCount: number;
+};
+
+function getSelectedSummary({ customizeOpen, invalidWeightPersonId, selectedCount, selectedWeightTotal, tripPeopleCount }: SelectedSummaryInput): string {
+  if (!customizeOpen) return `Split equally across ${tripPeopleCount} people`;
+  if (invalidWeightPersonId) return `${selectedCount} selected · fix weights`;
+  return `${selectedCount} selected · total weight ${selectedWeightTotal}`;
+}
+
+function focusInput(input?: HTMLInputElement | null) {
+  input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  input?.focus({ preventScroll: true });
+}
+
 function StatusMessage({ error, onClear }: { error?: string; onClear: () => void }) {
-  const message = error;
-  if (!message) return null;
-  return <button type="button" className="info-callout w-full text-left" onClick={onClear}>{message}</button>;
+  if (!error) return null;
+  return <button type="button" className="info-callout w-full text-left" onClick={onClear}>{error}</button>;
 }

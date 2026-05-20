@@ -1,3 +1,4 @@
+import { domainError } from './errors';
 import { getInvalidExpenseIds } from './split';
 import type { DomainError, Expense, ExpenseDraft, Person, TripCommand, TripCommandResult, TripState } from './types';
 
@@ -6,10 +7,6 @@ const AVATAR_COLORS = ['#e1eadf', '#deebd9', '#ede8df', '#e8e3d8', '#dce7e2', '#
 function makeId(prefix: string): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return `${prefix}-${crypto.randomUUID()}`;
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function error(code: string, message: string): DomainError {
-  return { code, message };
 }
 
 function touch(state: TripState, now: string): TripState {
@@ -22,7 +19,7 @@ export function tripReducer(state: TripState, command: TripCommand): TripCommand
   switch (command.type) {
     case 'person.add': {
       const name = command.name.trim();
-      if (!name) return { state, error: error('person.name.empty', 'Enter a name to add someone.') };
+      if (!name) return { state, error: domainError('person.name.empty') };
       const person: Person = {
         id: command.id ?? makeId('person'),
         tripId: state.id,
@@ -40,7 +37,7 @@ export function tripReducer(state: TripState, command: TripCommand): TripCommand
       if (referenced) {
         return {
           state,
-          error: error('person.remove.referenced', 'Remove that person from expenses before deleting them.'),
+          error: domainError('person.remove.referenced'),
         };
       }
       return { state: touch({ ...state, people: state.people.filter((person) => person.id !== command.personId) }, now) };
@@ -57,7 +54,7 @@ export function tripReducer(state: TripState, command: TripCommand): TripCommand
 
       const invalidIds = getInvalidExpenseIds(state.people, expenses);
       if (invalidIds.includes(draftResult.expense.id)) {
-        return { state, error: error('expense.invalid', 'Expense has an invalid payer or split.') };
+        return { state, error: domainError('expense.invalid') };
       }
 
       return { state: touch({ ...state, expenses }, now) };
@@ -77,30 +74,32 @@ function normalizeExpenseDraft(
   now: string,
 ): { expense: Expense } | { error: DomainError } {
   const title = draft.title.trim();
-  if (!title) return { error: error('expense.title.empty', 'Enter an expense title.') };
+  if (!title) return { error: domainError('expense.title.empty') };
   if (!Number.isSafeInteger(draft.amountCents) || draft.amountCents <= 0) {
-    return { error: error('expense.amount.invalid', 'Enter an amount greater than zero.') };
+    return { error: domainError('expense.amount.invalid') };
   }
-  if (!state.people.some((person) => person.id === draft.payerId)) {
-    return { error: error('expense.payer.invalid', 'Choose who paid.') };
+
+  const personIds = new Set(state.people.map((person) => person.id));
+  if (!personIds.has(draft.payerId)) {
+    return { error: domainError('expense.payer.invalid') };
   }
 
   const participants = draft.participants;
   if (participants.length === 0) {
-    return { error: error('expense.participants.empty', 'Choose at least one person to split this expense with.') };
+    return { error: domainError('expense.participants.empty') };
   }
 
   const participantIds = new Set<string>();
   for (const participant of participants) {
-    if (!state.people.some((person) => person.id === participant.personId)) {
-      return { error: error('expense.participant.invalid', 'Split includes someone who is not on this trip.') };
+    if (!personIds.has(participant.personId)) {
+      return { error: domainError('expense.participant.invalid') };
     }
     if (participantIds.has(participant.personId)) {
-      return { error: error('expense.participant.duplicate', 'Split includes the same person twice.') };
+      return { error: domainError('expense.participant.duplicate') };
     }
     participantIds.add(participant.personId);
     if (!Number.isFinite(participant.weight) || participant.weight <= 0) {
-      return { error: error('expense.weight.invalid', 'Enter a weight greater than zero for each selected person.') };
+      return { error: domainError('expense.weight.invalid') };
     }
   }
 

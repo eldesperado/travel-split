@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ERROR_MESSAGES, WARNING_MESSAGES, invalidExpensesWarning } from '../domain/errors';
 import { parseAmountToCents } from '../domain/money';
 import { selectTrip, type TripSelectors } from '../domain/selectors';
 import { tripReducer } from '../domain/tripReducer';
@@ -53,13 +54,13 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
         if (!loaded) await activeRepository.saveTrip(next);
         if (!alive) return;
         setTrip(next);
-        setWarning(loaded ? undefined : 'Started a new local trip.');
+        setWarning(loaded ? undefined : WARNING_MESSAGES['trip.started']);
         logger.info('trip.load.success', { tripId: next.id });
       } catch (loadError) {
         if (!alive) return;
         const fallback = createEmptyTrip();
         setTrip(fallback);
-        setWarning('Local database was unavailable, so an empty trip was opened.');
+        setWarning(WARNING_MESSAGES['storage.load.failed']);
         logger.error('trip.load.failed', { error: loadError });
       } finally {
         if (alive) setStatus('ready');
@@ -86,7 +87,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
       logger.info('trip.command.success', { type: command.type, tripId: result.state.id });
       return true;
     } catch (saveError) {
-      setError('Could not save this change locally. Try again.');
+      setError(ERROR_MESSAGES['storage.save.failed']);
       logger.error('trip.command.failed', { type: command.type, error: saveError });
       return false;
     }
@@ -124,7 +125,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
     selectors,
     error,
     warning: selectors.invalidExpenseIds.length > 0
-      ? `${selectors.invalidExpenseIds.length} invalid expense${selectors.invalidExpenseIds.length === 1 ? '' : 's'} ignored in settlement math.`
+      ? invalidExpensesWarning(selectors.invalidExpenseIds.length)
       : warning,
     addPerson,
     removePerson,

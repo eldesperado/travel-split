@@ -1,28 +1,29 @@
+import { domainError, type ErrorCode } from './errors';
 import type { Result } from './types';
 
 export function ok<T>(value: T): Result<T> {
   return { ok: true, value };
 }
 
-export function err(code: string, message: string): Result<never> {
-  return { ok: false, error: { code, message } };
+export function err(code: ErrorCode): Result<never> {
+  return { ok: false, error: domainError(code) };
 }
 
 export function parseAmountToCents(input: string): Result<number> {
   const normalized = input.trim().replace(/^\$/, '').replace(/,/g, '');
 
-  if (!normalized) return err('amount.empty', 'Enter an amount.');
+  if (!normalized) return err('amount.empty');
   if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) {
-    return err('amount.invalid', 'Use dollars and cents, like 40 or 40.50.');
+    return err('amount.invalid');
   }
 
   const [dollarsPart, centsPart = ''] = normalized.split('.');
   const dollars = Number(dollarsPart);
-  if (!Number.isSafeInteger(dollars)) return err('amount.invalid', 'Amount is too large.');
+  if (!Number.isSafeInteger(dollars)) return err('amount.too_large');
 
   const cents = dollars * 100 + Number(centsPart.padEnd(2, '0'));
-  if (cents <= 0) return err('amount.positive', 'Amount must be greater than zero.');
-  if (!Number.isSafeInteger(cents)) return err('amount.invalid', 'Amount is too large.');
+  if (cents <= 0) return err('amount.positive');
+  if (!Number.isSafeInteger(cents)) return err('amount.too_large');
 
   return ok(cents);
 }
