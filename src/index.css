@@ -515,9 +515,28 @@
   .settlement-row:active { transform: scale(0.98); opacity: 0.85; }
   .settlement-row:last-child { @apply mb-0; }
 
-  /* ── Info callout ── */
+  /* ── Info callout (neutral, e.g. disclaimers and tips) ── */
   .info-callout {
     @apply flex items-start gap-2 px-3 py-2.5 bg-brand-row border border-border-row rounded-lg text-[11px] text-ink-subtle leading-relaxed my-3;
+  }
+
+  /* ── Error callout (validation failures) ── */
+  .error-callout {
+    @apply flex items-start gap-2 px-3 py-2.5 rounded-lg text-[12px] font-medium leading-relaxed my-3 w-full text-left;
+    background: #fbe9e3;
+    border: 1px solid #e8b8a8;
+    color: #a33d2d;
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease-micro), border-color 0.15s var(--ease-micro);
+  }
+
+  .error-callout:hover {
+    background: #f8ddd4;
+    border-color: #d99e8b;
+  }
+
+  .error-callout:active {
+    transform: scale(0.995);
   }
 
   /* ── Empty state ── */

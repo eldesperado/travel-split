@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { ErrorCallout } from '../components/ErrorCallout';
 import { useScopedError, useTripData } from '../data/TripDataProvider';
 import { isAmountErrorMessage } from '../domain/errors';
 import { formatCentsAbs, parseAmountToCents } from '../domain/money';
@@ -101,7 +102,7 @@ export function ExpensesScreen() {
             <span className="count-badge">{trip.expenses.length}</span>
           </div>
 
-          <StatusMessage error={error} onClear={clearMessage} />
+          <ErrorCallout message={error} onDismiss={clearMessage} />
 
           {trip.people.length === 0 ? (
             <div className="empty-state">
@@ -242,7 +243,3 @@ function focusInput(input?: HTMLInputElement | null) {
   input?.focus({ preventScroll: true });
 }
 
-function StatusMessage({ error, onClear }: { error?: string; onClear: () => void }) {
-  if (!error) return null;
-  return <button type="button" className="info-callout w-full text-left" onClick={onClear}>{error}</button>;
-}

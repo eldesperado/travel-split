@@ -1,4 +1,5 @@
 import React, { useCallback, useId, useState } from 'react';
+import { ErrorCallout } from '../components/ErrorCallout';
 import { useScopedError, useTripData } from '../data/TripDataProvider';
 import type { Person } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
@@ -31,7 +32,7 @@ export function PeopleScreen() {
             <span className="count-badge">{trip.people.length}</span>
           </div>
 
-          <StatusMessage error={error} onClear={clearMessage} />
+          <ErrorCallout message={error} onDismiss={clearMessage} />
 
           <div className="field">
             <label className="field-label" htmlFor={inputId}>Add someone</label>
@@ -106,12 +107,3 @@ export function PeopleScreen() {
   );
 }
 
-function StatusMessage({ error, onClear }: { error?: string; onClear: () => void }) {
-  const message = error;
-  if (!message) return null;
-  return (
-    <button type="button" className="info-callout w-full text-left" onClick={onClear}>
-      {message}
-    </button>
-  );
-}
