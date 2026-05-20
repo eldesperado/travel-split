@@ -85,9 +85,9 @@ function normalizeExpenseDraft(
     return { error: error('expense.payer.invalid', 'Choose who paid.') };
   }
 
-  const participants = draft.participants.filter((participant) => participant.weight > 0);
+  const participants = draft.participants;
   if (participants.length === 0) {
-    return { error: error('expense.participants.empty', 'Choose at least one person to split with.') };
+    return { error: error('expense.participants.empty', 'Choose at least one person to split this expense with.') };
   }
 
   const participantIds = new Set<string>();
@@ -100,7 +100,7 @@ function normalizeExpenseDraft(
     }
     participantIds.add(participant.personId);
     if (!Number.isFinite(participant.weight) || participant.weight <= 0) {
-      return { error: error('expense.weight.invalid', 'Weights must be greater than zero.') };
+      return { error: error('expense.weight.invalid', 'Enter a weight greater than zero for each selected person.') };
     }
   }
 

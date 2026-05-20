@@ -10,7 +10,9 @@ export function ExpensesScreen() {
   const payerId = useId();
   const weightPrefix = useId();
   const { trip, upsertExpense, deleteExpense, error, warning, clearMessage } = useTripData();
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
+  const weightInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -29,15 +31,26 @@ export function ExpensesScreen() {
     setWeights((current) => Object.fromEntries(trip.people.map((person) => [person.id, current[person.id] ?? '1'])));
   }, [paidBy, trip.people]);
 
+  const selectedPeople = useMemo(() => {
+    return trip.people.filter((person) => !customizeOpen || included[person.id]);
+  }, [customizeOpen, included, trip.people]);
+
   const selectedParticipants = useMemo(() => {
-    return trip.people
-      .filter((person) => !customizeOpen || included[person.id])
-      .map((person) => ({ personId: person.id, weight: customizeOpen ? Number(weights[person.id]) : 1 }))
-      .filter((participant) => Number.isFinite(participant.weight) && participant.weight > 0);
-  }, [customizeOpen, included, trip.people, weights]);
+    return selectedPeople.map((person) => ({ personId: person.id, weight: customizeOpen ? Number(weights[person.id]) : 1 }));
+  }, [customizeOpen, selectedPeople, weights]);
+
+  const invalidWeightPersonId = useMemo(() => {
+    if (!customizeOpen) return undefined;
+    return selectedPeople.find((person) => {
+      const weight = Number(weights[person.id]);
+      return !Number.isFinite(weight) || weight <= 0;
+    })?.id;
+  }, [customizeOpen, selectedPeople, weights]);
 
   async function saveExpense() {
+    const titleInvalidBeforeSave = !title.trim();
     const amountInvalidBeforeSave = !parseAmountToCents(amount).ok;
+    const invalidWeightBeforeSave = invalidWeightPersonId != null;
     const saved = await upsertExpense({ title, amount, payerId: paidBy, participants: selectedParticipants });
     if (saved) {
       setTitle('');
@@ -49,13 +62,30 @@ export function ExpensesScreen() {
     if (amountInvalidBeforeSave) {
       amountInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       amountInputRef.current?.focus({ preventScroll: true });
+      return;
+    }
+
+    if (titleInvalidBeforeSave) {
+      titleInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      titleInputRef.current?.focus({ preventScroll: true });
+      return;
+    }
+
+    if (invalidWeightBeforeSave && invalidWeightPersonId) {
+      weightInputRefs.current[invalidWeightPersonId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      weightInputRefs.current[invalidWeightPersonId]?.focus({ preventScroll: true });
     }
   }
 
   const amountErrorMessages = ['Enter an amount.', 'Use dollars and cents, like 40 or 40.50.', 'Amount must be greater than zero.', 'Amount is too large.'];
   const amountHasError = error ? amountErrorMessages.includes(error) : false;
+  const selectedWeightTotal = selectedParticipants.reduce((sum, participant) => (
+    Number.isFinite(participant.weight) && participant.weight > 0 ? sum + participant.weight : sum
+  ), 0);
   const selectedSummary = customizeOpen
-    ? `${selectedParticipants.length} selected · total weight ${selectedParticipants.reduce((sum, participant) => sum + participant.weight, 0)}`
+    ? invalidWeightPersonId
+      ? `${selectedPeople.length} selected · fix weights`
+      : `${selectedPeople.length} selected · total weight ${selectedWeightTotal}`
     : `Split equally across ${trip.people.length} people`;
 
   return (
@@ -82,7 +112,7 @@ export function ExpensesScreen() {
             <>
               <div className="field">
                 <label className="field-label" htmlFor={titleId}>Title</label>
-                <input id={titleId} className="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" value={title} onChange={(event) => setTitle(event.target.value)} />
+                <input id={titleId} ref={titleInputRef} className="field-input" type="text" placeholder="e.g. Dinner, Boat tickets…" value={title} onChange={(event) => setTitle(event.target.value)} />
               </div>
 
               <div className="field">
@@ -129,7 +159,18 @@ export function ExpensesScreen() {
                       </label>
                       <div className="flex items-center gap-1.5">
                         <label className="text-[11px] text-ink-subtle" htmlFor={`${weightPrefix}-${person.id}`}>Weight</label>
-                        <input id={`${weightPrefix}-${person.id}`} type="number" value={weights[person.id] ?? '1'} min="0.25" step="0.25" disabled={!(included[person.id] ?? true)} onChange={(event) => setWeights((current) => ({ ...current, [person.id]: event.target.value }))} className="w-14 h-[34px] border-[1.5px] border-border-input rounded-lg text-center font-mono text-sm bg-white disabled:bg-brand-row disabled:opacity-40" />
+                        <input
+                          id={`${weightPrefix}-${person.id}`}
+                          ref={(element) => { weightInputRefs.current[person.id] = element; }}
+                          type="number"
+                          value={weights[person.id] ?? '1'}
+                          min="0.25"
+                          step="0.25"
+                          disabled={!(included[person.id] ?? true)}
+                          onChange={(event) => setWeights((current) => ({ ...current, [person.id]: event.target.value }))}
+                          aria-invalid={invalidWeightPersonId === person.id ? 'true' : undefined}
+                          className="w-14 h-[34px] border-[1.5px] border-border-input rounded-lg text-center font-mono text-sm bg-white disabled:bg-brand-row disabled:opacity-40"
+                        />
                       </div>
                     </div>
                   ))}

@@ -67,10 +67,12 @@ describe('tripReducer', () => {
       type: 'expense.upsert',
       expense: { title: 'Bad', amountCents: 100, payerId: 'alex', participants: [{ personId: 'missing', weight: 1 }] },
     }).error?.code).toBe('expense.participant.invalid');
-    expect(tripReducer(state, {
+    const invalidWeight = tripReducer(state, {
       type: 'expense.upsert',
       expense: { title: 'Bad', amountCents: 100, payerId: 'alex', participants: [{ personId: 'alex', weight: -1 }] },
-    }).error?.code).toBe('expense.participants.empty');
+    });
+    expect(invalidWeight.error?.code).toBe('expense.weight.invalid');
+    expect(invalidWeight.error?.message).toBe('Enter a weight greater than zero for each selected person.');
     expect(tripReducer(state, {
       type: 'expense.upsert',
       expense: { title: 'Bad', amountCents: 100, payerId: 'alex', participants: [{ personId: 'alex', weight: 1 }, { personId: 'alex', weight: 1 }] },
