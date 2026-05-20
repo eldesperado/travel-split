@@ -24,29 +24,31 @@ Travel Split is for small travel groups that need a simple shared-expense ledger
 
 ## UI walkthrough
 
+The screenshots below use a sample trip with three travelers — Alex, Mina, and Jordan — plus three shared expenses: welcome dinner, museum tickets, and airport taxi.
+
 ### Desktop workspace
 
-![Travel Split desktop workspace](docs/screenshots/desktop-workspace.png)
+![Travel Split desktop workspace with sample trip data](docs/screenshots/desktop-workspace.png)
 
 The desktop UI is a three-column workspace:
 
-1. **People** — add trip members and see the current group count.
-2. **Expenses** — the primary work area for recording activities and costs.
-3. **Settlement** — always-visible net balances and suggested payments.
+1. **People** — the left panel manages the trip roster and shows that all three travelers are part of the current split.
+2. **Expenses** — the center panel is the primary work area, showing the expense form plus recent trip costs.
+3. **Settlement** — the right panel is always visible, so every new expense immediately updates net balances and suggested payments.
 
 This layout is optimized for planning or reviewing a trip on a laptop. The user can add people, record costs, and see settlement impact without switching screens.
 
-### Mobile tab layout
+### Mobile Settle tab
 
-![Travel Split mobile tab layout](docs/screenshots/mobile-tabs.png)
+![Travel Split mobile Settle tab with sample trip data](docs/screenshots/mobile-settle.png)
 
 The mobile UI uses a bottom tab bar with three destinations:
 
 - **People** — manage travelers.
-- **Expenses** — record shared costs.
+- **Expenses** — record shared costs and show the expense count badge.
 - **Settle** — review who pays whom.
 
-The tab layout keeps each task focused on a phone-sized screen. The selected tab uses a filled pill around the icon and label, giving a clear active state while preserving large touch targets.
+The Settle tab turns the ledger into an action list: each traveler has a clear net balance, and suggested payments show the smallest set of transfers needed to settle the trip. The selected tab uses a filled pill around the icon and label, giving a clear active state while preserving large touch targets.
 
 ## Main features
 
