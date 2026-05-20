@@ -24,31 +24,16 @@ Travel Split is for small travel groups that need a simple shared-expense ledger
 
 ## UI walkthrough
 
-The screenshots below use a sample trip with three travelers — Alex, Mina, and Jordan — plus three shared expenses: welcome dinner, museum tickets, and airport taxi.
+The screenshots below use a sample trip with three travelers — Alex, Mina, and Jordan — plus three shared expenses: welcome dinner ($120), museum tickets ($75), and airport taxi ($36). Click any image for the full-resolution version.
 
-### Desktop workspace
+| Desktop workspace | Mobile · Expenses | Mobile · Settle |
+| :---: | :---: | :---: |
+| <a href="docs/screenshots/desktop-workspace.png"><img src="docs/screenshots/desktop-workspace.png" width="100%" alt="Travel Split desktop workspace with sample trip data" /></a> | <a href="docs/screenshots/mobile-tabs.png"><img src="docs/screenshots/mobile-tabs.png" width="100%" alt="Travel Split mobile Expenses tab" /></a> | <a href="docs/screenshots/mobile-settle.png"><img src="docs/screenshots/mobile-settle.png" width="100%" alt="Travel Split mobile Settle tab" /></a> |
+| Three-column layout: roster, expense form with recent list, and live settlement. | Bottom tab bar with the active Expenses pill and a count badge. | Net balances, suggested payments, and a selected-payment receipt. |
 
-![Travel Split desktop workspace with sample trip data](docs/screenshots/desktop-workspace.png)
+**Desktop** is optimized for planning or reviewing a trip on a laptop. People, Expenses, and Settlement live in one workspace so every new expense immediately updates net balances and suggested payments — no screen switching.
 
-The desktop UI is a three-column workspace:
-
-1. **People** — the left panel manages the trip roster and shows that all three travelers are part of the current split.
-2. **Expenses** — the center panel is the primary work area, showing the expense form plus recent trip costs.
-3. **Settlement** — the right panel is always visible, so every new expense immediately updates net balances and suggested payments.
-
-This layout is optimized for planning or reviewing a trip on a laptop. The user can add people, record costs, and see settlement impact without switching screens.
-
-### Mobile Settle tab
-
-![Travel Split mobile Settle tab with sample trip data](docs/screenshots/mobile-settle.png)
-
-The mobile UI uses a bottom tab bar with three destinations:
-
-- **People** — manage travelers.
-- **Expenses** — record shared costs and show the expense count badge.
-- **Settle** — review who pays whom.
-
-The Settle tab turns the ledger into an action list: each traveler has a clear net balance, and suggested payments show the smallest set of transfers needed to settle the trip. The selected tab uses a filled pill around the icon and label, giving a clear active state while preserving large touch targets.
+**Mobile** uses a bottom tab bar with three destinations: People (manage travelers), Expenses (record shared costs, with a count badge), and Settle (review who pays whom). The selected tab uses a filled pill around the icon and label for a clear active state while preserving large touch targets. On the Settle tab, tapping a suggested payment expands a receipt-style explanation precise to the cent.
 
 ## Main features
 
