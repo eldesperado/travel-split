@@ -9,7 +9,7 @@ export function ExpensesScreen() {
   const amountId = useId();
   const payerId = useId();
   const weightPrefix = useId();
-  const { trip, upsertExpense, deleteExpense, error, warning, clearMessage } = useTripData();
+  const { trip, upsertExpense, deleteExpense, error, clearMessage } = useTripData();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -100,7 +100,7 @@ export function ExpensesScreen() {
             <span className="count-badge">{trip.expenses.length}</span>
           </div>
 
-          <StatusMessage error={error} warning={warning} onClear={clearMessage} />
+          <StatusMessage error={error} onClear={clearMessage} />
 
           {trip.people.length === 0 ? (
             <div className="empty-state">
@@ -222,8 +222,8 @@ export function ExpensesScreen() {
   );
 }
 
-function StatusMessage({ error, warning, onClear }: { error?: string; warning?: string; onClear: () => void }) {
-  const message = error ?? warning;
+function StatusMessage({ error, onClear }: { error?: string; onClear: () => void }) {
+  const message = error;
   if (!message) return null;
   return <button type="button" className="info-callout w-full text-left" onClick={onClear}>{message}</button>;
 }

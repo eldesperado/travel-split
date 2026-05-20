@@ -240,6 +240,38 @@
 
   .desktop-workspace .receipt-card { border-radius: 10px; }
 
+  /* ── Trip-level notification banner ── */
+  .trip-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px clamp(16px, 4vw, 32px);
+    background: #edf2eb;
+    border-bottom: 1px solid #d0daca;
+    font-size: 12px;
+    color: #3f6f56;
+    flex-shrink: 0;
+  }
+
+  .trip-banner-msg {
+    flex: 1;
+  }
+
+  .trip-banner-dismiss {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #3f6f56;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    padding: 0;
+  }
+
   /* ── Status bar (mockup only — real browser ignores) ── */
   .status-bar {
     @apply flex items-end justify-between px-6 pt-0 pb-2 h-[54px] flex-shrink-0 font-mono text-sm font-semibold text-ink-primary;
@@ -631,5 +663,7 @@
     .desktop-workspace .disclosure-trigger { border-radius: 7px; }
 
     .desktop-workspace .receipt-card { border-radius: 10px; }
+
+    .trip-banner { margin-bottom: 16px; border-radius: 8px; border: 1px solid #d0daca; }
   }
 }

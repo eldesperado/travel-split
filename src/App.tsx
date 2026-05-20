@@ -24,6 +24,7 @@ function TravelSplitShell() {
     return (
       <div className="app-shell mobile-app-shell" data-layout="mobile">
         <NavBar showCopy={activeTab === 'settle'} />
+        <TripBanner />
 
         {status === 'loading' ? (
           <div className="screen-body flex items-center justify-center text-sm text-ink-subtle">Loading your trip…</div>
@@ -43,6 +44,7 @@ function TravelSplitShell() {
   return (
     <div className="desktop-app-shell" data-layout="desktop">
       <DesktopHeader />
+      <TripBanner />
       {status === 'loading' ? (
         <div className="desktop-loading">Loading your trip…</div>
       ) : (
@@ -52,6 +54,25 @@ function TravelSplitShell() {
           <SettleScreen />
         </main>
       )}
+    </div>
+  );
+}
+
+function TripBanner() {
+  const { warning, clearMessage } = useTripData();
+  if (!warning) return null;
+  return (
+    <div className="trip-banner" role="status" aria-live="polite">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.75" />
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      </svg>
+      <span className="trip-banner-msg">{warning}</span>
+      <button className="trip-banner-dismiss" onClick={clearMessage} aria-label="Dismiss notification">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      </button>
     </div>
   );
 }

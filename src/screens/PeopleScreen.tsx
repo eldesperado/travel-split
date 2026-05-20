@@ -6,7 +6,7 @@ import { useAnimatedCollection } from '../ui/useAnimatedCollection';
 export function PeopleScreen() {
   const inputId = useId();
   const [nameInput, setNameInput] = useState('');
-  const { trip, selectors, addPerson, removePerson, error, warning, clearMessage } = useTripData();
+  const { trip, selectors, addPerson, removePerson, error, clearMessage } = useTripData();
   const animatedPeople = useAnimatedCollection(
     trip.people,
     useCallback((person: Person) => person.id, []),
@@ -30,7 +30,7 @@ export function PeopleScreen() {
             <span className="count-badge">{trip.people.length}</span>
           </div>
 
-          <StatusMessage error={error} warning={warning} onClear={clearMessage} />
+          <StatusMessage error={error} onClear={clearMessage} />
 
           <div className="field">
             <label className="field-label" htmlFor={inputId}>Add someone</label>
@@ -105,8 +105,8 @@ export function PeopleScreen() {
   );
 }
 
-function StatusMessage({ error, warning, onClear }: { error?: string; warning?: string; onClear: () => void }) {
-  const message = error ?? warning;
+function StatusMessage({ error, onClear }: { error?: string; onClear: () => void }) {
+  const message = error;
   if (!message) return null;
   return (
     <button type="button" className="info-callout w-full text-left" onClick={onClear}>
