@@ -1,12 +1,13 @@
 import React, { useCallback, useId, useState } from 'react';
-import { useTripData } from '../data/TripDataProvider';
+import { useScopedError, useTripData } from '../data/TripDataProvider';
 import type { Person } from '../domain/types';
 import { useAnimatedCollection } from '../ui/useAnimatedCollection';
 
 export function PeopleScreen() {
   const inputId = useId();
   const [nameInput, setNameInput] = useState('');
-  const { trip, selectors, addPerson, removePerson, error, clearMessage } = useTripData();
+  const { trip, selectors, addPerson, removePerson, clearMessage } = useTripData();
+  const error = useScopedError('people');
   const animatedPeople = useAnimatedCollection(
     trip.people,
     useCallback((person: Person) => person.id, []),

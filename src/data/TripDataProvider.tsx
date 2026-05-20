@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ERROR_MESSAGES, WARNING_MESSAGES, invalidExpensesWarning } from '../domain/errors';
+import { ERROR_MESSAGES, WARNING_MESSAGES, errorSource, invalidExpensesWarning, type ErrorSource } from '../domain/errors';
 import { parseAmountToCents } from '../domain/money';
 import { selectTrip, type TripSelectors } from '../domain/selectors';
 import { tripReducer } from '../domain/tripReducer';
@@ -15,11 +15,13 @@ export type ExpenseFormInput = {
   participants: ExpenseParticipant[];
 };
 
+export type ScopedError = { source: ErrorSource; message: string };
+
 type TripDataContextValue = {
   status: 'loading' | 'ready';
   trip: TripState;
   selectors: TripSelectors;
-  error?: string;
+  error?: ScopedError;
   warning?: string;
   addPerson: (name: string) => Promise<boolean>;
   removePerson: (personId: string) => Promise<boolean>;
@@ -36,7 +38,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
   const activeRepository = repositoryRef.current;
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [trip, setTrip] = useState<TripState>(() => createEmptyTrip());
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<ScopedError>();
   const [warning, setWarning] = useState<string>();
   const tripRef = useRef(trip);
 
@@ -75,7 +77,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
     setError(undefined);
     const result = tripReducer(tripRef.current, command);
     if (result.error) {
-      setError(result.error.message);
+      setError({ source: errorSource(result.error.code), message: result.error.message });
       logger.warn('trip.command.validation_failed', { type: command.type, code: result.error.code });
       return false;
     }
@@ -87,7 +89,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
       logger.info('trip.command.success', { type: command.type, tripId: result.state.id });
       return true;
     } catch (saveError) {
-      setError(ERROR_MESSAGES['storage.save.failed']);
+      setError({ source: errorSource('storage.save.failed'), message: ERROR_MESSAGES['storage.save.failed'] });
       logger.error('trip.command.failed', { type: command.type, error: saveError });
       return false;
     }
@@ -100,7 +102,7 @@ export function TripDataProvider({ children, repository }: { children: ReactNode
   const upsertExpense = useCallback(async (input: ExpenseFormInput) => {
     const amount = parseAmountToCents(input.amount);
     if (!amount.ok) {
-      setError(amount.error.message);
+      setError({ source: errorSource(amount.error.code), message: amount.error.message });
       logger.warn('expense.validation.failed', { code: amount.error.code });
       return false;
     }
@@ -142,6 +144,12 @@ export function useTripData(): TripDataContextValue {
   const value = useContext(TripDataContext);
   if (!value) throw new Error('useTripData must be used inside TripDataProvider');
   return value;
+}
+
+export function useScopedError(scope: 'people' | 'expenses'): string | undefined {
+  const { error } = useTripData();
+  if (!error) return undefined;
+  return error.source === scope || error.source === 'global' ? error.message : undefined;
 }
 
 function buildShareSummary(trip: TripState, selectors: TripSelectors): string {

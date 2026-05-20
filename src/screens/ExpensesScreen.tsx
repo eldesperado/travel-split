@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useTripData } from '../data/TripDataProvider';
+import { useScopedError, useTripData } from '../data/TripDataProvider';
 import { isAmountErrorMessage } from '../domain/errors';
 import { formatCentsAbs, parseAmountToCents } from '../domain/money';
 import type { Expense, ExpenseParticipant } from '../domain/types';
@@ -10,7 +10,8 @@ export function ExpensesScreen() {
   const amountId = useId();
   const payerId = useId();
   const weightPrefix = useId();
-  const { trip, upsertExpense, deleteExpense, error, clearMessage } = useTripData();
+  const { trip, upsertExpense, deleteExpense, clearMessage } = useTripData();
+  const error = useScopedError('expenses');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<Record<string, HTMLInputElement | null>>({});

@@ -378,7 +378,7 @@
   .field:last-child { @apply mb-0; }
 
   .field-label {
-    @apply text-[10px] font-bold tracking-[0.04em] uppercase text-ink-muted;
+    @apply text-[11px] font-medium text-ink-muted;
   }
 
   .field-input {
@@ -517,12 +517,12 @@
 
   /* ── Info callout ── */
   .info-callout {
-    @apply flex items-start gap-2 px-3 py-2.5 bg-brand-row border border-border-row rounded-lg text-[11px] text-ink-subtle leading-relaxed mt-2.5;
+    @apply flex items-start gap-2 px-3 py-2.5 bg-brand-row border border-border-row rounded-lg text-[11px] text-ink-subtle leading-relaxed my-3;
   }
 
   /* ── Empty state ── */
   .empty-state {
-    @apply border-[1.5px] border-dashed border-border-dashed rounded-[10px] px-4 py-6 text-center mt-3;
+    @apply border-[1.5px] border-dashed border-border-dashed rounded-[10px] px-4 py-4 text-center mt-3;
   }
 
   /* ── Amount input prefix ── */

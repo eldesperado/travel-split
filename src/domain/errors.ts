@@ -25,6 +25,13 @@ export const WARNING_MESSAGES = {
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;
 export type WarningCode = keyof typeof WARNING_MESSAGES;
+export type ErrorSource = 'people' | 'expenses' | 'global';
+
+export function errorSource(code: string): ErrorSource {
+  if (code.startsWith('person.')) return 'people';
+  if (code.startsWith('expense.') || code.startsWith('amount.')) return 'expenses';
+  return 'global';
+}
 
 const AMOUNT_ERROR_CODES = ['amount.empty', 'amount.invalid', 'amount.too_large', 'amount.positive'] satisfies ErrorCode[];
 const AMOUNT_ERROR_MESSAGES: ReadonlySet<string> = new Set(AMOUNT_ERROR_CODES.map((code) => ERROR_MESSAGES[code]));
